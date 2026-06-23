@@ -25,7 +25,7 @@ export default function Services() {
               </div>
               <h3 className="font-bold text-2xl text-gray-900 mb-4">Electrical Repair Services</h3>
               <p className="text-gray-600 mb-6 leading-relaxed">
-                Layanan perbaikan khusus untuk komponen elektrikal industri seperti <b>PLCs, PCBs, Monitors, Servo Motors, dan Inverters</b>. 
+                Layanan perbaikan khusus untuk komponen elektrikal industri seperti <b>PLC, PCB, Monitor Industri, Servo Motor, dan Inverter</b>. 
                 Tim ahli kami menjamin tingkat kesuksesan perbaikan yang tinggi dengan komunikasi yang transparan di setiap tahap perbaikan.
               </p>
               <div className="bg-orange-50 text-brand-accent p-4 rounded-md text-sm font-bold border border-orange-100 flex items-start gap-2">
