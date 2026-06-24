@@ -3,6 +3,12 @@ import { Filter, Search, Cog, Activity, Wind, Cpu, Wrench, Package } from 'lucid
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import AddToCartButton from '@/components/products/AddToCartButton'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: "Katalog Produk & Suku Cadang | CV. ADIE",
+  description: "Jelajahi katalog lengkap suku cadang industri, pneumatic, automasi, mekanikal, dan peralatan pabrik dengan spesifikasi detail dari CV. ADIE.",
+};
 
 export const revalidate = 3600 // Regenerate cache every 1 hour (ISR)
 

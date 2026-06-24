@@ -1,6 +1,12 @@
 import { CheckCircle, History, Building2, User, FileSignature, MapPin, Phone, Mail, Hammer, ShieldCheck, Factory, Droplet, Wrench } from 'lucide-react'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: "Tentang Kami | CV. ADIE",
+  description: "Profil CV. Abadi Dewana Industrial Equipment, visi misi, legalitas, dan komitmen kami sebagai pemasok komponen industri terpercaya di Indonesia.",
+};
 
 export const revalidate = 3600
 

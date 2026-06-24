@@ -15,8 +15,34 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CV. Abadi Dewana | General Trading & Industrial Equipment",
-  description: "Mitra Terpercaya Pengadaan Komponen & Peralatan Industri Skala Besar.",
+  metadataBase: new URL('https://www.cv-adie.com'),
+  title: {
+    default: "CV. Abadi Dewana | General Trading & Industrial Equipment",
+    template: "%s | CV. ADIE",
+  },
+  description: "Mitra Terpercaya Pengadaan Komponen & Peralatan Industri Skala Besar. Menjamin downtime pabrik teratasi secara efisien melalui jaringan global sourcing.",
+  keywords: ["Distributor Valve Indonesia", "Suku Cadang Pabrik", "Industrial Equipment", "General Trading", "Pneumatik", "Kompresor", "Otomasi Industri"],
+  openGraph: {
+    title: "CV. Abadi Dewana | General Trading & Industrial Equipment",
+    description: "Mitra Terpercaya Pengadaan Komponen & Peralatan Industri Skala Besar.",
+    url: "https://www.cv-adie.com",
+    siteName: "CV. ADIE",
+    images: [
+      {
+        url: "https://www.cv-adie.com/logo.jpeg",
+        width: 800,
+        height: 600,
+      },
+    ],
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CV. Abadi Dewana",
+    description: "Mitra Terpercaya Pengadaan Komponen Industri Skala Besar.",
+    images: ["https://www.cv-adie.com/logo.jpeg"],
+  },
 };
 
 export default function RootLayout({
@@ -31,6 +57,12 @@ export default function RootLayout({
     "alternateName": "CV. ADIE",
     "url": "https://www.cv-adie.com",
     "logo": "https://www.cv-adie.com/logo.jpeg",
+    "description": "Distributor and general trading company specializing in industrial equipment, pneumatics, automation, and mechanical components in Indonesia.",
+    "knowsAbout": ["Industrial Valves", "Pneumatic Cylinders", "PLC Automation", "Industrial Sensors", "Textile Machinery Parts", "Global Sourcing"],
+    "areaServed": {
+      "@type": "Country",
+      "name": "Indonesia"
+    },
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+62-821-2777-2205",

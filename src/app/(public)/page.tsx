@@ -84,7 +84,7 @@ export default async function Home() {
   }) as any;
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <main className="flex flex-col min-h-screen">
       {/* Section 1: Hero Banner */}
       <section className="relative bg-brand-primary text-white overflow-hidden py-24 lg:py-32">
         <div className="absolute inset-0 bg-black/40 z-10" />
@@ -92,7 +92,7 @@ export default async function Home() {
         {hero.bg_image_url ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={hero.bg_image_url as string} alt="Background" className="absolute inset-0 w-full h-full object-cover z-0" />
+            <img src={hero.bg_image_url as string} alt="Fasilitas Industri dan Mesin Pabrik" className="absolute inset-0 w-full h-full object-cover z-0" />
           </>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-r from-brand-primary to-[#0f3b2d] z-0" />
@@ -176,7 +176,7 @@ export default async function Home() {
               {whyUs.image_url ? (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={whyUs.image_url as string} alt="Why Choose Us" className="w-full h-full object-cover" />
+                  <img src={whyUs.image_url as string} alt="Pelayanan dan Kualitas Suku Cadang Industri" className="w-full h-full object-cover" />
                 </>
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-tr from-brand-primary/20 to-transparent flex items-center justify-center">
@@ -248,6 +248,6 @@ export default async function Home() {
           </Link>
         </div>
       </section>
-    </div>
+    </main>
   )
 }
