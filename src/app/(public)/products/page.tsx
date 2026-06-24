@@ -6,7 +6,7 @@ import AddToCartButton from '@/components/products/AddToCartButton'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: "Katalog Produk & Suku Cadang | CV. ADIE",
+  title: "Katalog Produk & Suku Cadang",
   description: "Jelajahi katalog lengkap suku cadang industri, pneumatic, automasi, mekanikal, dan peralatan pabrik dengan spesifikasi detail dari CV. ADIE.",
 };
 

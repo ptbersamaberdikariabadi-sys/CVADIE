@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: "Tentang Kami | CV. ADIE",
+  title: "Tentang Kami",
   description: "Profil CV. Abadi Dewana Industrial Equipment, visi misi, legalitas, dan komitmen kami sebagai pemasok komponen industri terpercaya di Indonesia.",
 };
 
