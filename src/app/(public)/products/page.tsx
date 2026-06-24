@@ -1,6 +1,7 @@
-import { Filter, Search, Cog, Settings, Activity, Wind, Cpu, Shield, Wrench, Package } from 'lucide-react'
-import Link from 'next/link'
-import { createClient } from '@supabase/supabase-js'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Filter, Search, Cog, Activity, Wind, Cpu, Wrench, Package } from 'lucide-react'
+import { createClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
 import AddToCartButton from '@/components/products/AddToCartButton'
 
 export const revalidate = 3600 // Regenerate cache every 1 hour (ISR)
@@ -16,12 +17,9 @@ const getCategoryIcon = (category: string) => {
 }
 
 export default async function Products() {
-  // Use a public anonymous client to allow Next.js static caching (ISR)
-  // By avoiding cookies(), this page is no longer forced into Dynamic Rendering
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-  )
+  // Using standard server client as per architecture guidelines
+  const cookieStore = await cookies()
+  const supabase = createClient(cookieStore)
 
   // Fetch products from Supabase
   const { data: products, error } = await supabase
@@ -115,7 +113,10 @@ export default async function Products() {
                     <div key={prod.id || i} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1 flex flex-col group">
                       <div className="aspect-square bg-gray-50 flex items-center justify-center relative p-6 border-b border-gray-100">
                         {prod.image_url ? (
-                          <img src={prod.image_url} alt={prod.name} className="object-contain w-full h-full mix-blend-multiply" />
+                          <>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={prod.image_url} alt={prod.name} className="object-contain w-full h-full mix-blend-multiply" />
+                          </>
                         ) : (
                           <Icon className="w-24 h-24 text-gray-300 group-hover:text-brand-primary transition-colors" />
                         )}

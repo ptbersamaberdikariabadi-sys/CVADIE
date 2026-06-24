@@ -7,8 +7,8 @@ describe('Footer', () => {
     render(<Footer />)
     
     // Contact Info
-    expect(screen.getByText(/Hubungi Kami/i)).toBeInTheDocument()
-    expect(screen.getByText(/Tautan Cepat/i)).toBeInTheDocument()
-    expect(screen.getByText(/Hak Cipta/i)).toBeInTheDocument()
+    expect(screen.getByText(/Kontak & Dukungan/i)).toBeInTheDocument()
+    expect(screen.getByText(/Kantor & Workshop/i)).toBeInTheDocument()
+    expect(screen.getByText(/Legalitas/i)).toBeInTheDocument()
   })
 })

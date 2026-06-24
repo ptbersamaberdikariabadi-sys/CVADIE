@@ -53,7 +53,8 @@ export default async function AdminProductsPage() {
                       <div className="flex items-center gap-3">
                         {product.image_url ? (
                           <div className="w-10 h-10 rounded-md bg-gray-100 border border-gray-200 overflow-hidden flex-shrink-0">
-                            <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
                           </div>
                         ) : (
                           <div className="w-10 h-10 rounded-md bg-gray-100 border border-gray-200 flex items-center justify-center flex-shrink-0 text-xs text-gray-400">

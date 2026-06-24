@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X } from 'lucide-react';
-import Link from 'next/link';
+
 
 const contacts = [
   { name: 'Adie Woo', phone: '6282127772205', displayPhone: '+62 821-2777-2205', role: 'Direktur / Sales' },

@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 
-export async function updateCMSSection(sectionKey: string, contentData: any) {
+export async function updateCMSSection(sectionKey: string, contentData: unknown) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 

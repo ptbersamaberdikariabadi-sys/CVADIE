@@ -6,6 +6,7 @@ import { createClient } from '@/utils/supabase/client';
 import { Save, Loader2, UploadCloud, FileText } from 'lucide-react';
 
 type ProductFormProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialData?: any;
 };
 
@@ -37,7 +38,7 @@ export default function ProductForm({ initialData }: ProductFormProps) {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
     
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from(bucket)
       .upload(fileName, file, { cacheControl: '3600', upsert: false });
 
@@ -91,9 +92,10 @@ export default function ProductForm({ initialData }: ProductFormProps) {
 
       router.push('/admin/products');
       router.refresh(); // Refresh server component data
-    } catch (err: any) {
-      console.error("Submit Error:", err);
-      setError(err.message || 'Terjadi kesalahan saat menyimpan data.');
+    } catch (err: unknown) {
+      const error = err as Error;
+      console.error("Submit Error:", error);
+      setError(error.message || 'Terjadi kesalahan saat menyimpan data.');
     } finally {
       setIsSubmitting(false);
     }

@@ -12,7 +12,7 @@ export default async function AdminCmsPage() {
     .select('*');
 
   // Format ke bentuk key-value object
-  const initialContent: Record<string, any> = {};
+  const initialContent: Record<string, unknown> = {};
   if (cmsData) {
     cmsData.forEach(item => {
       initialContent[item.section_key] = item.content_data;

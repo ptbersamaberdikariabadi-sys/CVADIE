@@ -1,5 +1,4 @@
 import { Globe2, Cog, Wrench, ArrowRight, Activity, ShieldCheck, Zap } from 'lucide-react'
-import Link from 'next/link'
 
 export default function Services() {
   return (
@@ -9,7 +8,7 @@ export default function Services() {
         <div className="container mx-auto px-4 text-center">
           <h1 className="font-serif text-4xl md:text-5xl font-bold mb-6">Layanan Perbaikan & Solusi Teknis</h1>
           <p className="text-xl max-w-3xl mx-auto text-gray-200 leading-relaxed">
-            Lebih dari sekadar penyedia komponen. Kami memberikan solusi teknis <i>end-to-end</i> dengan prinsip <b>"Garansi Moral"</b> dan pelayanan tanpa biaya jika perbaikan tidak terbukti berhasil.
+            Lebih dari sekadar penyedia komponen. Kami memberikan solusi teknis <i>end-to-end</i> dengan prinsip <b>&quot;Garansi Moral&quot;</b> dan pelayanan tanpa biaya jika perbaikan tidak terbukti berhasil.
           </p>
         </div>
       </section>
@@ -51,7 +50,7 @@ export default function Services() {
               <div className="w-16 h-16 bg-brand-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-brand-primary transition-colors">
                 <Wrench className="w-8 h-8 text-brand-primary group-hover:text-white transition-colors" />
               </div>
-              <h3 className="font-bold text-2xl text-gray-900 mb-4">Technical & After-Sales ("Garansi Moral")</h3>
+              <h3 className="font-bold text-2xl text-gray-900 mb-4">Technical & After-Sales (&quot;Garansi Moral&quot;)</h3>
               <p className="text-gray-600 mb-6 leading-relaxed">
                 Kami tidak melepas tanggung jawab setelah barang diterima. Jika komponen yang disuplai atau diservis mengalami kendala pasca-pemasangan, CV. ADIE akan <b>menggantinya 100% identik</b> dan mendampingi hingga mesin dipastikan berjalan normal kembali.
               </p>

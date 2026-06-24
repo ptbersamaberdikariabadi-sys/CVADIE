@@ -1,13 +1,18 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import Header from '../Header'
+import { CartProvider } from '@/context/CartContext'
 
 describe('Header', () => {
   it('renders the logo and navigation links', () => {
-    render(<Header />)
+    render(
+      <CartProvider>
+        <Header />
+      </CartProvider>
+    )
     
-    // Check for logo text or alt text
-    expect(screen.getByText(/CV. ABADI DEWANA/i)).toBeInTheDocument()
+    // Check for logo alt text
+    expect(screen.getByAltText(/Logo CV. ADIE/i)).toBeInTheDocument()
     
     // Check for navigation links
     expect(screen.getByRole('link', { name: /BERANDA/i })).toBeInTheDocument()

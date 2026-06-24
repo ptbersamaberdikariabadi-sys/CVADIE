@@ -23,6 +23,7 @@ export default function RFQPage() {
   const supabase = createClient();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -132,7 +133,10 @@ export default function RFQPage() {
                     <div key={item.id} className="flex flex-col sm:flex-row items-center gap-4 p-4 border border-gray-100 rounded-lg hover:border-brand-primary/30 transition-colors">
                       <div className="w-16 h-16 bg-gray-50 flex items-center justify-center shrink-0 rounded p-1">
                         {item.image_url ? (
-                          <img src={item.image_url} alt={item.name} className="object-contain w-full h-full mix-blend-multiply" />
+                          <>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={item.image_url} alt={item.name} className="object-contain w-full h-full mix-blend-multiply" />
+                          </>
                         ) : (
                           <Factory className="w-8 h-8 text-gray-300" />
                         )}
