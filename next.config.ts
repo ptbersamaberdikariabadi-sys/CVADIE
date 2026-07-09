@@ -32,16 +32,7 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        // Cache Next.js static assets for 1 year
-        source: '/_next/static/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
+
       {
         // Cache public assets (images, fonts) for 30 days
         source: '/(.*).(jpg|jpeg|png|gif|svg|webp|avif|woff|woff2|ico)',
