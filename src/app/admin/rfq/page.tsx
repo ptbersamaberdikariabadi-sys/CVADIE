@@ -9,7 +9,8 @@ export default async function AdminRFQPage() {
   const { data: rfqs } = await supabase
     .from('rfq_requests')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(100);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -77,7 +78,7 @@ export default async function AdminRFQPage() {
                       <Eye className="w-4 h-4" />
                     </button>
                     <a 
-                      href={`https://wa.me/${rfq.phone.replace(/[^0-9]/g, '')}?text=Halo Bapak/Ibu ${rfq.name} dari ${rfq.company_name}, kami telah menerima penawaran Anda...`}
+                      href={`https://wa.me/${(rfq.phone || '').replace(/[^0-9]/g, '')}?text=Halo Bapak/Ibu ${rfq.name} dari ${rfq.company_name}, kami telah menerima permintaan penawaran (RFQ) Anda...`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 text-gray-400 hover:text-emerald-600 bg-gray-50 hover:bg-emerald-50 rounded-lg transition-colors inline-flex items-center" 

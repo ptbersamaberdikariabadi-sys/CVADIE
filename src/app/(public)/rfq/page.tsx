@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Upload, MessageCircle, FileText, Factory, AlertCircle, Phone, Trash2, Plus, Minus, ShoppingCart } from 'lucide-react';
-import { createClient } from '@/utils/supabase/client';
 import { useCart } from '@/context/CartContext';
+import { submitRFQ } from '@/app/actions/rfqActions';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function RFQPage() {
@@ -20,8 +21,6 @@ export default function RFQPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const supabase = createClient();
-
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
@@ -36,40 +35,12 @@ export default function RFQPage() {
     setIsSubmitting(true);
 
     try {
-      // 1. Insert ke database Supabase
-      const { data: rfqData, error } = await supabase.from('rfq_requests').insert([
-        {
-          contact_person: formData.name,
-          company_name: formData.company,
-          email: formData.email,
-          phone: formData.phone,
-          urgency: formData.urgency,
-          message: formData.message || (cart.length > 0 ? "Pengajuan dari RFQ Cart" : ""),
-          status: 'RFQ_RECEIVED'
-        }
-      ]).select('id').single();
+      const result = await submitRFQ(formData, cart);
 
-      if (error || !rfqData) {
-        console.error("Gagal mengirim RFQ ke database:", error);
-        alert("Terjadi kesalahan saat menyimpan data RFQ.");
+      if (!result.success) {
+        alert(result.error || "Terjadi kesalahan saat menyimpan data RFQ.");
         setIsSubmitting(false);
         return;
-      }
-
-      // 2. Insert RFQ Items
-      if (cart.length > 0) {
-        const rfqItems = cart.map(item => ({
-          rfq_id: rfqData.id,
-          product_id: item.id,
-          quantity: item.quantity,
-          notes: ''
-        }));
-
-        const { error: itemsError } = await supabase.from('rfq_items').insert(rfqItems);
-        if (itemsError) {
-          console.error("Gagal menyimpan item RFQ:", itemsError);
-          // Kita tetap lanjutkan ke WhatsApp walaupun gagal simpan item
-        }
       }
 
       // 3. Build WhatsApp Message & Redirect
@@ -134,8 +105,9 @@ export default function RFQPage() {
                       <div className="w-16 h-16 bg-gray-50 flex items-center justify-center shrink-0 rounded p-1">
                         {item.image_url ? (
                           <>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={item.image_url} alt={item.name} className="object-contain w-full h-full mix-blend-multiply" />
+                          <div className="relative w-full h-full">
+                            <Image src={item.image_url} alt={item.name} fill className="object-contain mix-blend-multiply" sizes="64px" />
+                          </div>
                           </>
                         ) : (
                           <Factory className="w-8 h-8 text-gray-300" />

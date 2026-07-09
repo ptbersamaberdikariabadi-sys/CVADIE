@@ -1,6 +1,24 @@
+import { createClient } from '@/utils/supabase/server'
+import { cookies } from 'next/headers'
 
+export default async function Footer() {
+  const cookieStore = await cookies()
+  const supabase = createClient(cookieStore)
+  
+  const { data } = await supabase
+    .from('cms_content')
+    .select('content_data')
+    .eq('section_key', 'about_page')
+    .single();
 
-export default function Footer() {
+  const legalContact = data?.content_data?.legal_contact || null;
+  const contacts = legalContact?.contacts || [];
+  
+  const adminAddress = contacts.find((c: { title: string }) => c.title.includes('Administrasi'))?.desc || "Tanjungsari RT/RW 002/006, Kec. Sukasari\nKab. Sumedang, Jawa Barat.";
+  const workshopAddress = contacts.find((c: { title: string }) => c.title.includes('Workshop'))?.desc || "Dusun Cinulukadu, RT/RW 03/08\nRancaekek, Kab. Bandung, Jawa Barat.";
+  const phoneInfo = contacts.find((c: { title: string }) => c.title.includes('Telepon'))?.desc || "0821-2777-2205";
+  const emailInfo = contacts.find((c: { title: string }) => c.title.includes('Email'))?.desc || "abadidewana.ie@gmail.com";
+
   return (
     <footer className="bg-brand-primary text-white py-12">
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -10,13 +28,15 @@ export default function Footer() {
           <address className="not-italic text-gray-300 space-y-4 text-sm">
             <div>
               <p className="font-bold text-white mb-1">Kantor Administrasi:</p>
-              <p>Tanjungsari RT/RW 002/006, Kec. Sukasari</p>
-              <p>Kab. Sumedang, Jawa Barat.</p>
+              {adminAddress.split('\n').map((line: string, i: number) => (
+                <p key={`admin-${i}`}>{line}</p>
+              ))}
             </div>
             <div>
               <p className="font-bold text-white mb-1">Workshop & Gudang:</p>
-              <p>Dusun Cinulukadu, RT/RW 03/08</p>
-              <p>Rancaekek, Kab. Bandung, Jawa Barat.</p>
+              {workshopAddress.split('\n').map((line: string, i: number) => (
+                <p key={`workshop-${i}`}>{line}</p>
+              ))}
             </div>
           </address>
         </div>
@@ -27,12 +47,13 @@ export default function Footer() {
           <ul className="space-y-3 text-sm text-gray-300">
             <li className="flex flex-col">
               <span className="font-bold text-white">Email:</span>
-              <a href="mailto:abadidewana.ie@gmail.com" className="hover:text-brand-accent transition-colors">abadidewana.ie@gmail.com</a>
+              <a href={`mailto:${emailInfo}`} className="hover:text-brand-accent transition-colors">{emailInfo}</a>
             </li>
             <li className="flex flex-col">
               <span className="font-bold text-white">Telepon / WhatsApp:</span>
-              <span>0821-2777-2205</span>
-              <span>(0261) 2142579</span>
+              {phoneInfo.split(' / ').map((p: string, i: number) => (
+                <span key={`phone-${i}`}>{p}</span>
+              ))}
             </li>
           </ul>
         </div>

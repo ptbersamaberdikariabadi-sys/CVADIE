@@ -1,15 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Filter, Search, Cog, Activity, Wind, Cpu, Wrench, Package } from 'lucide-react'
+import { Filter, Search, Cog, Activity, Wind, Cpu, Wrench, Package, ArrowLeft } from 'lucide-react'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import AddToCartButton from '@/components/products/AddToCartButton'
 import { Metadata } from 'next'
 import Image from 'next/image'
+import Link from 'next/link'
+import { generateTitleFromSlug } from '@/utils/slugify'
 
-export const metadata: Metadata = {
-  title: "Katalog Produk & Suku Cadang",
-  description: "Jelajahi katalog lengkap suku cadang industri, pneumatic, automasi, mekanikal, dan peralatan pabrik dengan spesifikasi detail dari CV. ADIE.",
-};
+export async function generateMetadata(
+  props: { params: Promise<{ category: string }> }
+): Promise<Metadata> {
+  const params = await props.params;
+  const categoryTitle = generateTitleFromSlug(params.category);
+  return {
+    title: `Produk ${categoryTitle} - CV. ADIE`,
+    description: `Jelajahi katalog lengkap produk ${categoryTitle} dari CV. ADIE.`,
+  }
+}
 
 export const revalidate = 3600 // Regenerate cache every 1 hour (ISR)
 
@@ -23,28 +31,52 @@ const getCategoryIcon = (category: string) => {
   return Package;
 }
 
-export default async function Products() {
-  // Using standard server client as per architecture guidelines
+export default async function CategoryPage(props: { params: Promise<{ category: string }>, searchParams: Promise<{ sub?: string }> }) {
+  const params = await props.params;
+  const searchParams = await props.searchParams;
+  const slug = params.category;
+  const categoryTitle = generateTitleFromSlug(slug);
+  const selectedSub = searchParams.sub;
+
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
 
-  // ✅ PERF: Select only required columns and limit results for fast initial load.
-  // Full pagination can be implemented server-side later.
-  const { data: products, error } = await supabase
+  // ✅ PERF: Single query — fetch all products for this category, then extract
+  // unique sub-categories in memory. Avoids a second round-trip to the DB.
+  let query = supabase
     .from('products')
     .select('id,name,part_number,brand,category,sub_category,description,image_url,created_at')
+    .ilike('category', categoryTitle)
     .order('created_at', { ascending: false })
-    .limit(48)
+    .limit(48);
 
-  // Fallback to empty array if no products found or error occurs
+  if (selectedSub) {
+    query = query.ilike('sub_category', selectedSub);
+  }
+
+  const { data: products, error } = await query;
   const productList = products || []
+
+  // Derive unique sub-categories from the fetched data (zero extra DB calls)
+  const uniqueSubCategories = selectedSub
+    ? await (async () => {
+        const { data } = await supabase
+          .from('products')
+          .select('sub_category')
+          .ilike('category', categoryTitle);
+        return Array.from(new Set((data || []).map(p => p.sub_category).filter(Boolean))) as string[];
+      })()
+    : Array.from(new Set(productList.map(p => p.sub_category).filter(Boolean))) as string[];
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <section className="bg-brand-primary text-white py-12">
         <div className="container mx-auto px-4">
-          <h1 className="font-serif text-3xl md:text-4xl font-bold mb-4">Katalog Produk</h1>
-          <p className="text-gray-200">Eksplorasi komponen spesifik industri, otomasi, dan suku cadang pabrik.</p>
+          <Link href="/products" className="inline-flex items-center gap-2 text-brand-accent hover:text-white transition-colors mb-4 text-sm font-bold">
+            <ArrowLeft className="w-4 h-4" /> KEMBALI KE SEMUA PRODUK
+          </Link>
+          <h1 className="font-serif text-3xl md:text-4xl font-bold mb-4">{categoryTitle}</h1>
+          <p className="text-gray-200">Katalog spesifik untuk kebutuhan {categoryTitle} di pabrik Anda.</p>
         </div>
       </section>
 
@@ -54,38 +86,39 @@ export default async function Products() {
           <aside className="w-full md:w-64 shrink-0">
             <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm sticky top-28">
               <div className="flex items-center gap-2 mb-6 text-brand-primary font-bold text-lg border-b pb-4">
-                <Filter className="w-5 h-5" /> Filter Produk
+                <Filter className="w-5 h-5" /> Filter Sub-Kategori
               </div>
               
               <div className="mb-6">
-                <h3 className="font-bold text-gray-900 mb-3">Kategori Spesifik</h3>
                 <ul className="space-y-3 text-sm text-gray-600">
-                  {[
-                    'Pneumatik & Kompresor', 
-                    'Otomatisasi & Komponen Elektronik', 
-                    'Perbaikan Elektrikal', 
-                    'Suku Cadang Khusus Tekstil', 
-                    'Perkakas & Produk Lain-lain'
-                  ].map((cat, idx) => (
-                    <li key={idx} className="flex items-center gap-2 cursor-pointer hover:text-brand-accent transition-colors">
-                      <input type="checkbox" className="rounded text-brand-primary focus:ring-brand-primary w-4 h-4 cursor-pointer" />
-                      {cat}
-                    </li>
-                  ))}
+                  <li className="flex items-center gap-2">
+                    <Link 
+                      href={`/products/${slug}`} 
+                      className={`flex-1 transition-colors ${!selectedSub ? 'text-brand-primary font-bold' : 'hover:text-brand-accent'}`}
+                    >
+                      Semua Produk {categoryTitle}
+                    </Link>
+                  </li>
+                  {uniqueSubCategories.length > 0 ? (
+                    uniqueSubCategories.map((sub, idx) => {
+                      const isActive = selectedSub === sub;
+                      return (
+                        <li key={idx} className="flex items-center gap-2">
+                          <Link 
+                            href={`/products/${slug}?sub=${encodeURIComponent(sub)}`}
+                            className={`flex-1 transition-colors ${isActive ? 'text-brand-primary font-bold' : 'hover:text-brand-accent'}`}
+                          >
+                            {sub}
+                          </Link>
+                        </li>
+                      );
+                    })
+                  ) : (
+                    <li className="text-gray-400 italic">Tidak ada sub-kategori tersedia</li>
+                  )}
                 </ul>
               </div>
 
-              <div>
-                <h3 className="font-bold text-gray-900 mb-3">Merek (Brands)</h3>
-                <ul className="space-y-3 text-sm text-gray-600">
-                  {['CKD', 'FESTO', 'SMC', 'RBCA', 'DeWALT', 'Pamy', 'Elite Air'].map((brand, idx) => (
-                    <li key={idx} className="flex items-center gap-2 cursor-pointer hover:text-brand-accent transition-colors">
-                      <input type="checkbox" className="rounded text-brand-primary focus:ring-brand-primary w-4 h-4 cursor-pointer" />
-                      {brand}
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </div>
           </aside>
 
@@ -95,7 +128,7 @@ export default async function Products() {
               <div className="relative w-full max-w-md">
                 <input 
                   type="text" 
-                  placeholder="Cari part number atau tipe barang..." 
+                  placeholder={`Cari di ${categoryTitle}...`}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:border-brand-primary focus:ring-brand-primary"
                 />
                 <Search className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
@@ -111,7 +144,7 @@ export default async function Products() {
               </div>
             ) : productList.length === 0 ? (
               <div className="p-8 text-center bg-white text-gray-500 rounded-lg border border-gray-200 shadow-sm">
-                Belum ada produk yang ditambahkan. Silakan eksekusi skrip <code className="bg-gray-100 px-1 rounded">seed.sql</code> di Supabase.
+                Tidak ada produk ditemukan di kategori/sub-kategori ini.
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -163,16 +196,6 @@ export default async function Products() {
               </div>
             )}
             
-            {/* Pagination */}
-            {productList.length > 0 && (
-              <div className="mt-12 flex justify-center gap-2">
-                {[1].map((p, idx) => (
-                  <button key={idx} className={`w-10 h-10 rounded flex items-center justify-center font-bold ${p === 1 ? 'bg-brand-primary text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
-                    {p}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </section>

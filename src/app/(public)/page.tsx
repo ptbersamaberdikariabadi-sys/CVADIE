@@ -1,22 +1,35 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from 'next/link'
-import { Award, Headphones, ArrowRight, CheckCircle2, Factory, Package, Activity, Wrench, Zap, Upload, FileCheck2, Cpu, Wind } from 'lucide-react'
+import Image from 'next/image'
+import { Award, Headphones, ArrowRight, CheckCircle2, Factory, Package, Activity, Wrench, Zap, Upload, FileCheck2, Cpu, Wind, Cog } from 'lucide-react'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
+import { generateSlug } from '@/utils/slugify'
+import AddToCartButton from '@/components/products/AddToCartButton'
 
 export const revalidate = 3600 // 1 hour, but revalidatePath will clear it instantly on edit
 
 // Icon Mapping helper
 const IconMap: Record<string, unknown> = {
-  Award, Factory, FileCheck2, Headphones, Wind, Cpu, Activity, Wrench, Package
+  Award, Factory, FileCheck2, Headphones, Wind, Cpu, Activity, Wrench, Package, Cog
 };
+
+const getCategoryIcon = (category: string) => {
+  if (category?.includes('Pneumatik')) return Wind;
+  if (category?.includes('Otomatisasi') || category?.includes('Elektronik')) return Cpu;
+  if (category?.includes('Elektrikal')) return Activity;
+  if (category?.includes('Tekstil')) return Cog;
+  if (category?.includes('Perkakas')) return Wrench;
+  return Package;
+}
 
 export default async function Home() {
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
 
-  // Fetch all CMS content
-  const { data: cmsData } = await supabase.from('cms_content').select('*')
+  // ✅ PERF: Select only required columns — avoids pulling unused fields like
+  // `created_at`, `updated_at`, `id`, etc. from every CMS row.
+  const { data: cmsData } = await supabase.from('cms_content').select('section_key,content_data')
   
   const content: any = {}
   if (cmsData) {
@@ -24,6 +37,15 @@ export default async function Home() {
       content[item.section_key] = item.content_data
     })
   }
+
+  // Ambil data produk terbaru untuk ditampilkan di landing page
+  const { data: products } = await supabase
+    .from('products')
+    .select('id,name,part_number,brand,category,sub_category,description,image_url,created_at')
+    .order('created_at', { ascending: false })
+    .limit(6)
+  
+  const productList = products || []
 
   // Fallbacks if data doesn't exist
   const hero = (content['hero_section'] || {
@@ -91,8 +113,7 @@ export default async function Home() {
         
         {hero.bg_image_url ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={hero.bg_image_url as string} alt="Fasilitas Industri dan Mesin Pabrik" className="absolute inset-0 w-full h-full object-cover z-0" />
+            <Image src={hero.bg_image_url as string} alt="Fasilitas Industri dan Mesin Pabrik" fill className="object-cover z-0" priority />
           </>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-r from-brand-primary to-[#0f3b2d] z-0" />
@@ -151,18 +172,89 @@ export default async function Home() {
             {(categories.items as any[]).map((category: any, idx: number) => {
               const IconComponent = (IconMap[category.icon as string] || Package) as React.ElementType;
               return (
-                <div key={idx} className="bg-white rounded-lg p-8 shadow-sm hover:shadow-md border border-gray-100 transition-all cursor-pointer group flex flex-col items-center text-center">
+                <Link 
+                  href={`/products/${generateSlug(category.title)}`}
+                  key={idx} 
+                  className="bg-white rounded-lg p-8 shadow-sm hover:shadow-md border border-gray-100 transition-all cursor-pointer group flex flex-col items-center text-center block"
+                >
                   <IconComponent className="w-16 h-16 text-brand-primary mb-6 group-hover:scale-110 transition-transform" />
                   <h3 className="font-bold text-xl text-gray-900 mb-2">{category.title}</h3>
                   <p className="text-sm text-gray-500">{category.desc}</p>
-                </div>
+                </Link>
               );
             })}
           </div>
 
           <div className="text-center">
             <Link href="/products" className="inline-flex items-center gap-2 text-brand-primary font-bold hover:text-brand-accent transition-colors">
-              {categories.link_text} <ArrowRight className="w-5 h-5" />
+              {categories.link_text || 'Lihat Semua Kategori'} <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 3.5: Produk Tersedia */}
+      <section className="py-20 bg-white border-t border-gray-100">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="font-serif text-3xl md:text-4xl font-bold text-brand-primary mb-4">Produk Tersedia</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">Lihat daftar sebagian produk dan suku cadang industri dari katalog kami.</p>
+          </div>
+          
+          {productList.length === 0 ? (
+            <div className="p-8 text-center bg-gray-50 text-gray-500 rounded-lg border border-gray-200 shadow-sm max-w-2xl mx-auto">
+              Belum ada produk yang ditambahkan.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+              {productList.map((prod: any, i: number) => {
+                const Icon = getCategoryIcon(prod.category)
+                return (
+                  <div key={prod.id || i} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1 flex flex-col group">
+                    <div className="aspect-square bg-gray-50 flex items-center justify-center relative p-6 border-b border-gray-100">
+                      {prod.image_url ? (
+                        <Image src={prod.image_url} alt={prod.name} fill className="object-contain mix-blend-multiply" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
+                      ) : (
+                        <Icon className="w-24 h-24 text-gray-300 group-hover:text-brand-primary transition-colors" />
+                      )}
+                    </div>
+                    <div className="p-5 flex flex-col flex-1">
+                      <div className="flex justify-between items-start mb-2 gap-2">
+                        <div className="text-xs font-bold text-brand-primary uppercase tracking-wider">{prod.brand}</div>
+                        <div className="text-xs text-gray-400 font-medium text-right">
+                          {prod.category}
+                          {prod.sub_category && (
+                            <span className="block text-[10px] text-gray-300 mt-0.5">{prod.sub_category}</span>
+                          )}
+                        </div>
+                      </div>
+                      <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 leading-tight">{prod.name}</h3>
+                      <p className="text-xs font-mono text-gray-500 mb-2">PN: {prod.part_number}</p>
+                      <p className="text-sm text-gray-500 mb-6 flex-1 leading-relaxed line-clamp-3">{prod.description}</p>
+                      <div className="flex items-center gap-2 mt-auto">
+                        <button className="flex-1 text-center border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white font-bold py-2.5 rounded transition-colors text-sm">
+                          DETAIL
+                        </button>
+                        <AddToCartButton 
+                          product={{
+                            id: prod.id,
+                            part_number: prod.part_number,
+                            name: prod.name,
+                            category: prod.category,
+                            image_url: prod.image_url
+                          }} 
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          <div className="text-center">
+            <Link href="/products" className="inline-flex items-center gap-2 bg-brand-primary text-white px-8 py-4 rounded-md font-bold hover:bg-brand-accent transition-colors shadow-md">
+              Lihat Semua Produk <ArrowRight className="w-5 h-5" />
             </Link>
           </div>
         </div>
@@ -175,8 +267,7 @@ export default async function Home() {
             <div className="aspect-square bg-gray-200 rounded-xl overflow-hidden relative shadow-lg">
               {whyUs.image_url ? (
                 <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={whyUs.image_url as string} alt="Pelayanan dan Kualitas Suku Cadang Industri" className="w-full h-full object-cover" />
+                  <Image src={whyUs.image_url as string} alt="Pelayanan dan Kualitas Suku Cadang Industri" fill className="object-cover" />
                 </>
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-tr from-brand-primary/20 to-transparent flex items-center justify-center">

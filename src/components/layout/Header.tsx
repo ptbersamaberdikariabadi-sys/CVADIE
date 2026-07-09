@@ -23,9 +23,7 @@ export default function Header() {
         <nav className="hidden md:flex items-center gap-8 font-medium text-sm text-gray-700">
           <Link href="/" className="hover:text-brand-primary transition-colors">BERANDA</Link>
           <Link href="/about" className="hover:text-brand-primary transition-colors">TENTANG KAMI</Link>
-          <div className="relative group cursor-pointer">
-            <Link href="/products" className="hover:text-brand-primary transition-colors">PRODUK</Link>
-          </div>
+
           <Link href="/services" className="hover:text-brand-primary transition-colors">LAYANAN</Link>
         </nav>
 

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Save, Loader2, Image as ImageIcon, Plus, Trash2 } from 'lucide-react';
 import { updateCMSSection } from '@/app/actions/cmsActions';
 import { createClient } from '@/utils/supabase/client';
+import Image from 'next/image';
 
 export default function CmsEditor({ initialContent }: { initialContent: any }) {
   const supabase = createClient();
@@ -207,8 +208,7 @@ export default function CmsEditor({ initialContent }: { initialContent: any }) {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Gambar Latar Belakang (Background)</label>
                   {content['hero_section'].bg_image_url && (
                     <div className="mb-3 relative w-full h-32 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={content['hero_section'].bg_image_url as string} alt="Hero BG" className="w-full h-full object-cover" />
+                      <Image src={content['hero_section'].bg_image_url as string} alt="Hero BG" fill className="object-cover" />
                     </div>
                   )}
                   <div className="flex items-center gap-4">
@@ -256,8 +256,7 @@ export default function CmsEditor({ initialContent }: { initialContent: any }) {
                 <label className="block text-sm font-medium text-gray-700 mb-2">Gambar Samping (Opsional)</label>
                 {content['why_choose_us'].image_url && (
                   <div className="mb-3 relative w-48 h-48 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={content['why_choose_us'].image_url as string} alt="Why Us" className="w-full h-full object-cover" />
+                    <Image src={content['why_choose_us'].image_url as string} alt="Why Us" fill className="object-cover" />
                   </div>
                 )}
                 <div className="flex items-center gap-4">
