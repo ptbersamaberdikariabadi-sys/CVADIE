@@ -17,3 +17,10 @@ body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
+/* ─── Hero Slideshow Animations ──────────────────────────────────── */
+@keyframes kenBurns {
+  0%   { transform: scale(1)    translateX(0%)      translateY(0%); }
+  50%  { transform: scale(1.07) translateX(-0.6%)   translateY(-0.4%); }
+  100% { transform: scale(1)    translateX(0%)      translateY(0%); }
+}
+

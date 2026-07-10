@@ -6,6 +6,7 @@ import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { generateSlug } from '@/utils/slugify'
 import AddToCartButton from '@/components/products/AddToCartButton'
+import HeroSlideshow from '@/components/layout/HeroSlideshow'
 
 export const revalidate = 3600 // 1 hour, but revalidatePath will clear it instantly on edit
 
@@ -53,7 +54,10 @@ export default async function Home() {
     description: "CV. Abadi Dewana Industrial Equipment (CV. ADIE) menjamin downtime pabrik Anda dapat teratasi secara efisien melalui jaringan pengadaan global dan komitmen Jaminan Garansi Riil.",
     button_primary: "MINTA PENAWARAN (RFQ)",
     button_secondary: "JELAJAHI KATALOG PRODUK",
-    bg_image_url: ""
+    bg_image_url: "",
+    // slides: array of { image_url, alt } — dikelola via CMS Admin.
+    // Jika kosong, HeroSlideshow pakai DEFAULT_SLIDES bawaan.
+    slides: []
   }) as any;
 
   const trustGrid = (content['trust_grid'] || {
@@ -109,16 +113,13 @@ export default async function Home() {
     <main className="flex flex-col min-h-screen">
       {/* Section 1: Hero Banner */}
       <section className="relative bg-brand-primary text-white overflow-hidden py-24 lg:py-32">
-        <div className="absolute inset-0 bg-black/40 z-10" />
+        {/* z-0: Background slideshow — cycles through industrial photos */}
+        <HeroSlideshow slides={hero.slides} />
+
+        {/* z-10: Dark overlay untuk kontras teks di atas foto */}
+        <div className="absolute inset-0 bg-black/50 z-10" />
         
-        {hero.bg_image_url ? (
-          <>
-            <Image src={hero.bg_image_url as string} alt="Fasilitas Industri dan Mesin Pabrik" fill className="object-cover z-0" priority />
-          </>
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-r from-brand-primary to-[#0f3b2d] z-0" />
-        )}
-        
+        {/* z-20: Hero content (tetap di Server Component) */}
         <div className="container relative z-20 mx-auto px-4 flex flex-col items-center text-center">
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold max-w-4xl leading-tight mb-6">
             {hero.headline}
@@ -171,15 +172,50 @@ export default async function Home() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12 justify-center">
             {(categories.items as any[]).map((category: any, idx: number) => {
               const IconComponent = (IconMap[category.icon as string] || Package) as React.ElementType;
+              const hasImage = !!category.image_url;
               return (
                 <Link 
                   href={`/products/${generateSlug(category.title)}`}
                   key={idx} 
-                  className="bg-white rounded-lg p-8 shadow-sm hover:shadow-md border border-gray-100 transition-all cursor-pointer group flex flex-col items-center text-center block"
+                  className="relative rounded-lg overflow-hidden shadow-sm hover:shadow-lg border border-gray-100 transition-all duration-300 cursor-pointer group flex flex-col block"
                 >
-                  <IconComponent className="w-16 h-16 text-brand-primary mb-6 group-hover:scale-110 transition-transform" />
-                  <h3 className="font-bold text-xl text-gray-900 mb-2">{category.title}</h3>
-                  <p className="text-sm text-gray-500">{category.desc}</p>
+                  {/* Background layer */}
+                  {hasImage ? (
+                    <>
+                      {/* Image with subtle zoom on hover */}
+                      <div
+                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                        style={{ backgroundImage: `url(${category.image_url})` }}
+                      />
+                      {/* Dark overlay — lightens slightly on hover */}
+                      <div className="absolute inset-0 bg-black/55 group-hover:bg-black/45 transition-colors duration-300" />
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 bg-white" />
+                  )}
+
+                  {/* Card content */}
+                  <div className="relative z-10 p-8 flex flex-col items-center text-center w-full">
+                    <IconComponent
+                      className={`w-16 h-16 mb-6 group-hover:scale-110 transition-transform ${
+                        hasImage ? 'text-white drop-shadow-md' : 'text-brand-primary'
+                      }`}
+                    />
+                    <h3
+                      className={`font-bold text-xl mb-2 ${
+                        hasImage ? 'text-white drop-shadow-sm' : 'text-gray-900'
+                      }`}
+                    >
+                      {category.title}
+                    </h3>
+                    <p
+                      className={`text-sm ${
+                        hasImage ? 'text-gray-200' : 'text-gray-500'
+                      }`}
+                    >
+                      {category.desc}
+                    </p>
+                  </div>
                 </Link>
               );
             })}

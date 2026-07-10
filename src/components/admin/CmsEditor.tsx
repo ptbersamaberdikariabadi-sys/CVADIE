@@ -99,6 +99,41 @@ export default function CmsEditor({ initialContent }: { initialContent: any }) {
     }
   };
 
+  // Handle Image Upload for array items (e.g. services[idx].image_url)
+  const handleArrayImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    section: string,
+    field: string,
+    index: number,
+    subField: string
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsSaving(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${section}_${field}_${index}_${subField}_${Date.now()}.${fileExt}`;
+
+      const { error } = await supabase.storage
+        .from('public-assets')
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+      if (error) throw error;
+
+      const { data: publicUrlData } = supabase.storage
+        .from('public-assets')
+        .getPublicUrl(fileName);
+
+      handleArrayChange(section, field, index, subField, publicUrlData.publicUrl);
+    } catch (err) {
+      console.error("Upload error", err);
+      alert("Gagal mengunggah gambar.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleSave = async (section: string) => {
     setIsSaving(true);
     setMessage('');
@@ -118,7 +153,7 @@ export default function CmsEditor({ initialContent }: { initialContent: any }) {
     { id: 'hero_section', label: 'Seksi Hero' },
     { id: 'why_choose_us', label: 'Seksi Alasan' },
     { id: 'trust_grid', label: 'Pilar Kepercayaan' },
-    { id: 'product_categories', label: 'Kategori Produk' },
+    { id: 'services', label: 'Kategori Layanan' },
     { id: 'workflow', label: 'Seksi Alur Kerja' },
     { id: 'cta_banner', label: 'Banner CTA Bawah' },
     { id: 'about_page', label: 'Halaman Tentang Kami' },
@@ -312,10 +347,130 @@ export default function CmsEditor({ initialContent }: { initialContent: any }) {
             </div>
           )}
 
-          {/* General structure for other tabs (Trust Grid, Categories, Workflow, CTA) */}
-          {/* I will implement a generic JSON stringifier fallback for those to save space, but let's make it user friendly */}
-          
-          {(activeTab === 'trust_grid' || activeTab === 'workflow' || activeTab === 'product_categories' || activeTab === 'cta_banner' || activeTab === 'about_page') && content[activeTab] && (
+          {/* === SERVICES / KATEGORI LAYANAN === */}
+          {activeTab === 'services' && content['services'] && (
+            <div className="space-y-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Edit Kartu Kategori Layanan</h3>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Judul Seksi</label>
+                <input
+                  type="text"
+                  value={content['services'].title || ''}
+                  onChange={(e) => handleChange('services', 'title', e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-brand-primary focus:border-brand-primary outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">Kartu Layanan</label>
+                <div className="space-y-4">
+                  {(content['services'].items as any[])?.map((item: any, idx: number) => (
+                    <div key={idx} className="border border-gray-200 rounded-lg p-4 bg-gray-50 space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-semibold text-gray-700">Kartu #{idx + 1}</span>
+                        <button
+                          onClick={() => handleArrayRemove('services', 'items', idx)}
+                          className="p-1 text-red-500 hover:bg-red-50 rounded-md"
+                          title="Hapus kartu ini"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Judul Kartu</label>
+                          <input
+                            type="text"
+                            value={item.title || ''}
+                            onChange={(e) => handleArrayChange('services', 'items', idx, 'title', e.target.value)}
+                            className="w-full p-2 border border-gray-300 rounded-md text-sm outline-none"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 mb-1">Icon (nama Lucide)</label>
+                          <input
+                            type="text"
+                            value={item.icon || ''}
+                            onChange={(e) => handleArrayChange('services', 'items', idx, 'icon', e.target.value)}
+                            placeholder="Wind, Cpu, Zap, Wrench..."
+                            className="w-full p-2 border border-gray-300 rounded-md text-sm outline-none font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Deskripsi Singkat</label>
+                        <input
+                          type="text"
+                          value={item.desc || ''}
+                          onChange={(e) => handleArrayChange('services', 'items', idx, 'desc', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-md text-sm outline-none"
+                        />
+                      </div>
+
+                      {/* Per-card image upload */}
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-2">
+                          Gambar Latar Kartu{' '}
+                          <span className="text-gray-400 font-normal">(opsional — jika diisi, menggantikan latar putih)</span>
+                        </label>
+                        {item.image_url && (
+                          <div className="mb-2 relative w-full h-24 bg-gray-200 rounded-lg overflow-hidden border border-gray-200">
+                            <Image
+                              src={item.image_url as string}
+                              alt={item.title || `Kartu ${idx + 1}`}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="flex items-center gap-3">
+                          <label className="cursor-pointer bg-white hover:bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md font-medium text-xs flex items-center gap-1.5 border border-gray-300 transition-colors">
+                            <ImageIcon className="w-3.5 h-3.5" />
+                            {item.image_url ? 'Ganti Gambar' : 'Unggah Gambar Latar'}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => handleArrayImageUpload(e, 'services', 'items', idx, 'image_url')}
+                            />
+                          </label>
+                          {item.image_url && (
+                            <button
+                              type="button"
+                              onClick={() => handleArrayChange('services', 'items', idx, 'image_url', '')}
+                              className="text-xs text-red-600 hover:underline"
+                            >
+                              Hapus Gambar
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    onClick={() =>
+                      handleArrayAdd('services', 'items', {
+                        title: 'Layanan Baru',
+                        desc: 'Deskripsi layanan.',
+                        icon: 'Package',
+                        image_url: ''
+                      })
+                    }
+                    className="text-sm font-medium text-brand-primary flex items-center gap-1 hover:underline"
+                  >
+                    <Plus className="w-4 h-4" /> Tambah Kartu Baru
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* General JSON fallback for remaining tabs */}
+          {(activeTab === 'trust_grid' || activeTab === 'workflow' || activeTab === 'cta_banner' || activeTab === 'about_page') && content[activeTab] && (
             <div className="space-y-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4 capitalize">Edit {activeTab.replace('_', ' ')}</h3>
               <p className="text-sm text-gray-500 mb-4">Pengeditan tingkat lanjut via JSON editor (sementara). Pastikan format tidak rusak (tanda kutip dsb).</p>
