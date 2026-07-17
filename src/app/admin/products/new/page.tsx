@@ -1,8 +1,18 @@
 import ProductForm from "@/components/admin/ProductForm";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 
-export default function NewProductPage() {
+export default async function NewProductPage() {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  // Fetch categories from CMS
+  const { data: cmsData } = await supabase.from('cms_content').select('content_data').eq('section_key', 'services').single();
+  const services = cmsData?.content_data?.items || [];
+  const cmsCategories = services.map((s: any) => s.title);
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
@@ -17,7 +27,7 @@ export default function NewProductPage() {
         </div>
       </div>
       
-      <ProductForm />
+      <ProductForm cmsCategories={cmsCategories} />
     </div>
   );
 }

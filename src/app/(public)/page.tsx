@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Award, Headphones, ArrowRight, CheckCircle2, Factory, Package, Activity, Wrench, Zap, Upload, FileCheck2, Cpu, Wind, Cog } from 'lucide-react'
+import * as Icons from 'lucide-react'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { generateSlug } from '@/utils/slugify'
@@ -11,16 +12,19 @@ import HeroSlideshow from '@/components/layout/HeroSlideshow'
 export const revalidate = 3600 // 1 hour, but revalidatePath will clear it instantly on edit
 
 // Icon Mapping helper
-const IconMap: Record<string, unknown> = {
-  Award, Factory, FileCheck2, Headphones, Wind, Cpu, Activity, Wrench, Package, Cog
+const getDynamicIcon = (iconName: string | undefined, FallbackIcon: any) => {
+  if (iconName && (Icons as any)[iconName]) {
+    return (Icons as any)[iconName];
+  }
+  return FallbackIcon;
 };
 
 const getCategoryIcon = (category: string) => {
-  if (category?.includes('Pneumatik')) return Wind;
-  if (category?.includes('Otomatisasi') || category?.includes('Elektronik')) return Cpu;
-  if (category?.includes('Elektrikal')) return Activity;
-  if (category?.includes('Tekstil')) return Cog;
-  if (category?.includes('Perkakas')) return Wrench;
+  if (category?.includes('Pneumatik')) return (Icons as any).Wind || Wind;
+  if (category?.includes('Otomatisasi') || category?.includes('Elektronik')) return (Icons as any).Cpu || Cpu;
+  if (category?.includes('Elektrikal')) return (Icons as any).Activity || Activity;
+  if (category?.includes('Tekstil')) return (Icons as any).Cog || Cog;
+  if (category?.includes('Perkakas')) return (Icons as any).Wrench || Wrench;
   return Package;
 }
 
@@ -148,8 +152,8 @@ export default async function Home() {
       <section className="py-12 bg-white border-b">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {(trustGrid.items as any[]).map((item: any, idx: number) => {
-              const IconComponent = (IconMap[item.icon as string] || Award) as React.ElementType;
+            {((trustGrid.items || []) as any[]).map((item: any, idx: number) => {
+              const IconComponent = getDynamicIcon(item.icon as string, Award) as React.ElementType;
               return (
                 <div key={idx} className="flex flex-col items-center text-center p-6">
                   <IconComponent className="w-12 h-12 text-brand-accent mb-4" />
@@ -170,8 +174,8 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12 justify-center">
-            {(categories.items as any[]).map((category: any, idx: number) => {
-              const IconComponent = (IconMap[category.icon as string] || Package) as React.ElementType;
+            {((categories.items || []) as any[]).map((category: any, idx: number) => {
+              const IconComponent = getDynamicIcon(category.icon as string, Package) as React.ElementType;
               const hasImage = !!category.image_url;
               return (
                 <Link 

@@ -19,7 +19,99 @@ export default async function AdminCmsPage() {
     });
   }
 
-  // Ensure about_page has a default schema if not in DB yet so it can be edited
+  // Provide default schemas for all sections if they are not in DB yet
+  if (!initialContent['hero_section']) {
+    initialContent['hero_section'] = {
+      headline: "Partner Solusi Suku Cadang Kritis Industri & Manufaktur Besar",
+      description: "CV. Abadi Dewana Industrial Equipment (CV. ADIE) menjamin downtime pabrik Anda dapat teratasi secara efisien melalui jaringan pengadaan global dan komitmen Jaminan Garansi Riil.",
+      button_primary: "MINTA PENAWARAN (RFQ)",
+      button_secondary: "JELAJAHI KATALOG PRODUK",
+      bg_image_url: "",
+      slides: [
+        {
+          image_url: '/logo.jpeg',
+          alt: 'Logo CV. ADIE — CV. Abadi Dewana Industrial Equipment',
+          is_logo: true,
+        },
+        {
+          image_url: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1920&q=80&auto=format&fit=crop',
+          alt: 'Teknisi di fasilitas manufaktur modern',
+        },
+        {
+          image_url: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=1920&q=80&auto=format&fit=crop',
+          alt: 'Mesin industri berat di pabrik',
+        },
+        {
+          image_url: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1920&q=80&auto=format&fit=crop',
+          alt: 'Lini produksi otomasi elektronik',
+        },
+        {
+          image_url: 'https://images.unsplash.com/photo-1565596003821-4b52b84f55a9?w=1920&q=80&auto=format&fit=crop',
+          alt: 'Sistem pneumatik & komponen industri',
+        }
+      ]
+    };
+  }
+
+  if (!initialContent['trust_grid']) {
+    initialContent['trust_grid'] = {
+      items: [
+        { title: "Jaminan Garansi Riil Penggantian 100%", icon: "Award" },
+        { title: "Solusi Global Sourcing Part Langka", icon: "Factory" },
+        { title: "Status PKP & Legalitas B2B Resmi", icon: "FileCheck2" },
+        { title: "Dukungan Teknisi Berpengalaman & After-Sales", icon: "Headphones" }
+      ]
+    };
+  }
+
+  if (!initialContent['services']) {
+    initialContent['services'] = {
+      title: "Sektor Industri & Layanan Utama",
+      items: [
+        { title: "Pneumatik & Kompresor", desc: "Silinder, Valve, Fitting, Tubing, FRL dari brand terkemuka.", icon: "Wind" },
+        { title: "Otomasi & Elektrikal", desc: "PLC, Inverter, Sensor, Relay, HMI, dan komponen control panel.", icon: "Cpu" },
+        { title: "Mekanikal & Transmisi", desc: "Bearing, Belt, Chain, Gearbox, Motor Industri.", icon: "Zap" },
+        { title: "Tekstil Spesial", desc: "Suku cadang khusus mesin tenun, dyeing, spinning.", icon: "Package" },
+        { title: "Fabrikasi Khusus", desc: "Pembuatan sparepart custom (bubut, milling, welding).", icon: "Factory" },
+        { title: "Maintenance & Service", desc: "Perbaikan Inverter, Servo, Modul Elektronik industri.", icon: "Wrench" }
+      ]
+    };
+  }
+
+  if (!initialContent['why_choose_us']) {
+    initialContent['why_choose_us'] = {
+      title: "Mengapa CV. ADIE Berbeda?",
+      image_url: "",
+      points: [
+        "Jaminan Garansi Riil: Jika komponen berkendala, kami ganti 100% identik & dampingi pengujian hingga mesin berjalan running normal.",
+        "Harga Kompetitif & Fleksibel: Menggunakan jaringan global sourcing untuk menemukan part langka dengan komitmen harga rasional dan opsi negosiasi adil.",
+        "Spesialis Manufaktur: Spesialisasi andal dalam menyuplai Pabrik Tekstil, Autopart, Makanan, Pulp & Paper, dan Water Treatment.",
+        "ToP Fleksibel: Mendukung kelancaran cash flow operasional dengan Term of Payment yang disesuaikan kesepakatan kontrak.",
+        "PKP Aktif & Legalitas Valid: Akta Pendirian, NIB, NPWP lengkap, dan kami berhak menerbitkan Faktur Pajak resmi di setiap transaksi."
+      ]
+    };
+  }
+
+  if (!initialContent['workflow']) {
+    initialContent['workflow'] = {
+      title: "Alur Kerja Pengadaan Cepat & Tepat",
+      steps: [
+        { title: "Identifikasi Masalah", desc: "Konsultasi part langka atau penggantian" },
+        { title: "Kirim RFQ", desc: "Upload daftar kebutuhan spesifik" },
+        { title: "Global Sourcing", desc: "Pencarian harga rasional & negosiasi" },
+        { title: "Delivery & Setup", desc: "Barang diantar dan didampingi teknisi" }
+      ]
+    };
+  }
+
+  if (!initialContent['cta_banner']) {
+    initialContent['cta_banner'] = {
+      title: "PUNYA KEBUTUHAN MENDESAK UNTUK MENCEGAH DOWNTIME?",
+      description: "Tim CV. ADIE siap melacak komponen yang Anda butuhkan melalui jaringan pengadaan global dengan harga yang sangat masuk akal dan term of payment fleksibel.",
+      button_text: "HUBUNGI KAMI SEKARANG (RFQ)"
+    };
+  }
+
   if (!initialContent['about_page']) {
     initialContent['about_page'] = {
       hero: {
@@ -65,9 +157,9 @@ export default async function AdminCmsPage() {
         ],
         contact_title: "Informasi Kontak & Lokasi",
         contacts: [
-          { icon: "MapPin", title: "Kantor Administrasi", desc: "Tanjungsari RT/RW 002/006\nKec. Sukasari, Kab. Sumedang\nJawa Barat" },
-          { icon: "Hammer", title: "Workshop & Gudang", desc: "Dusun Cinulukadu, RT/RW 03/08\nKec. Rancaekek, Kab. Bandung\nJawa Barat" },
-          { icon: "Phone", title: "Telepon & Mobile", desc: "(0261) 2142579 / 0821-2777-2205" },
+          { icon: "MapPin", title: "Kantor Administrasi", desc: "Dusun Bengang RT.05/RW.07 Desa Buahdua\nKec. Buahdua, Kab. Sumedang\nJawa Barat - 45392" },
+          { icon: "Phone", title: "Telepon Kantor", desc: "(0261) 2142579" },
+          { icon: "Phone", title: "WhatsApp", desc: "+62 838-4758-2958" },
           { icon: "Mail", title: "Email Resmi", desc: "abadidewana.ie@gmail.com" }
         ]
       }

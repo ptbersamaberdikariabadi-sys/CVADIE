@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Filter, Search, Cog, Activity, Wind, Cpu, Wrench, Package, ArrowLeft } from 'lucide-react'
+import { Filter, Search, Package, ArrowLeft } from 'lucide-react'
+import * as Icons from 'lucide-react'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import AddToCartButton from '@/components/products/AddToCartButton'
@@ -21,16 +22,6 @@ export async function generateMetadata(
 
 export const revalidate = 3600 // Regenerate cache every 1 hour (ISR)
 
-// Helper function to get an icon based on category
-const getCategoryIcon = (category: string) => {
-  if (category.includes('Pneumatik')) return Wind;
-  if (category.includes('Otomatisasi') || category.includes('Elektronik')) return Cpu;
-  if (category.includes('Elektrikal')) return Activity;
-  if (category.includes('Tekstil')) return Cog;
-  if (category.includes('Perkakas')) return Wrench;
-  return Package;
-}
-
 export default async function CategoryPage(props: { params: Promise<{ category: string }>, searchParams: Promise<{ sub?: string }> }) {
   const params = await props.params;
   const searchParams = await props.searchParams;
@@ -40,6 +31,19 @@ export default async function CategoryPage(props: { params: Promise<{ category: 
 
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
+
+  // Fetch CMS Services for categories
+  const { data: cmsData } = await supabase.from('cms_content').select('content_data').eq('section_key', 'services').single();
+  const services = cmsData?.content_data?.items || [];
+
+  // Helper function to get an icon based on CMS category mapping
+  const getCategoryIcon = (catTitle: string) => {
+    const service = services.find((s: any) => s.title === catTitle);
+    if (service && service.icon && (Icons as any)[service.icon]) {
+      return (Icons as any)[service.icon];
+    }
+    return Package;
+  }
 
   // ✅ PERF: Single query — fetch all products for this category, then extract
   // unique sub-categories in memory. Avoids a second round-trip to the DB.

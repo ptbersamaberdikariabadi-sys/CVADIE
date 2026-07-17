@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Filter, Search, Cog, Activity, Wind, Cpu, Wrench, Package } from 'lucide-react'
+import { Filter, Search, Package } from 'lucide-react'
+import * as Icons from 'lucide-react'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import AddToCartButton from '@/components/products/AddToCartButton'
 import { Metadata } from 'next'
 import Image from 'next/image'
+import Link from 'next/link'
+import { generateSlug } from '@/utils/slugify'
 
 export const metadata: Metadata = {
   title: "Katalog Produk & Suku Cadang",
@@ -13,30 +16,34 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600 // Regenerate cache every 1 hour (ISR)
 
-// Helper function to get an icon based on category
-const getCategoryIcon = (category: string) => {
-  if (category.includes('Pneumatik')) return Wind;
-  if (category.includes('Otomatisasi') || category.includes('Elektronik')) return Cpu;
-  if (category.includes('Elektrikal')) return Activity;
-  if (category.includes('Tekstil')) return Cog;
-  if (category.includes('Perkakas')) return Wrench;
-  return Package;
-}
-
 export default async function Products() {
-  // Using standard server client as per architecture guidelines
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
 
-  // ✅ PERF: Select only required columns and limit results for fast initial load.
-  // Full pagination can be implemented server-side later.
+  // Fetch CMS Services for categories
+  const { data: cmsData } = await supabase.from('cms_content').select('content_data').eq('section_key', 'services').single();
+  const services = cmsData?.content_data?.items || [];
+  const cmsCategories = services.map((s: any) => s.title);
+
+  // Helper function to get an icon based on CMS category mapping
+  const getCategoryIcon = (categoryTitle: string) => {
+    const service = services.find((s: any) => s.title === categoryTitle);
+    if (service && service.icon && (Icons as any)[service.icon]) {
+      return (Icons as any)[service.icon];
+    }
+    return Package;
+  }
+
+  // Fetch unique brands directly from products
+  const { data: brandData } = await supabase.from('products').select('brand');
+  const uniqueBrands = Array.from(new Set((brandData || []).map(p => p.brand).filter(Boolean))) as string[];
+
   const { data: products, error } = await supabase
     .from('products')
     .select('id,name,part_number,brand,category,sub_category,description,image_url,created_at')
     .order('created_at', { ascending: false })
     .limit(48)
 
-  // Fallback to empty array if no products found or error occurs
   const productList = products || []
 
   return (
@@ -60,30 +67,33 @@ export default async function Products() {
               <div className="mb-6">
                 <h3 className="font-bold text-gray-900 mb-3">Kategori Spesifik</h3>
                 <ul className="space-y-3 text-sm text-gray-600">
-                  {[
-                    'Pneumatik & Kompresor', 
-                    'Otomatisasi & Komponen Elektronik', 
-                    'Perbaikan Elektrikal', 
-                    'Suku Cadang Khusus Tekstil', 
-                    'Perkakas & Produk Lain-lain'
-                  ].map((cat, idx) => (
-                    <li key={idx} className="flex items-center gap-2 cursor-pointer hover:text-brand-accent transition-colors">
-                      <input type="checkbox" className="rounded text-brand-primary focus:ring-brand-primary w-4 h-4 cursor-pointer" />
-                      {cat}
-                    </li>
-                  ))}
+                  {cmsCategories.length > 0 ? (
+                    cmsCategories.map((cat: string, idx: number) => (
+                      <li key={idx} className="flex items-center gap-2 cursor-pointer hover:text-brand-accent transition-colors">
+                        <Link href={`/products/${generateSlug(cat)}`} className="flex-1 text-gray-600 hover:text-brand-accent transition-colors">
+                          {cat}
+                        </Link>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-gray-400 italic">Belum ada kategori</li>
+                  )}
                 </ul>
               </div>
 
               <div>
                 <h3 className="font-bold text-gray-900 mb-3">Merek (Brands)</h3>
                 <ul className="space-y-3 text-sm text-gray-600">
-                  {['CKD', 'FESTO', 'SMC', 'RBCA', 'DeWALT', 'Pamy', 'Elite Air'].map((brand, idx) => (
-                    <li key={idx} className="flex items-center gap-2 cursor-pointer hover:text-brand-accent transition-colors">
-                      <input type="checkbox" className="rounded text-brand-primary focus:ring-brand-primary w-4 h-4 cursor-pointer" />
-                      {brand}
-                    </li>
-                  ))}
+                  {uniqueBrands.length > 0 ? (
+                    uniqueBrands.map((brand, idx) => (
+                      <li key={idx} className="flex items-center gap-2 cursor-pointer hover:text-brand-accent transition-colors">
+                        <input type="checkbox" className="rounded text-brand-primary focus:ring-brand-primary w-4 h-4 cursor-pointer" />
+                        {brand}
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-gray-400 italic">Belum ada merek</li>
+                  )}
                 </ul>
               </div>
             </div>

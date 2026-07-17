@@ -3,9 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X } from 'lucide-react';
 
-
+// Hapus "Adie Woo" — hanya tampilkan tim yang relevan
 const contacts = [
-  { name: 'Adie Woo', phone: '6282127772205', displayPhone: '+62 821-2777-2205', role: 'Direktur / Sales' },
   { name: 'Fuja', phone: '6283847582958', displayPhone: '+62 838-4758-2958', role: 'Admin / Support' },
   { name: 'Ihsan', phone: '6282116381296', displayPhone: '+62 821-1638-1296', role: 'Teknisi / Support' },
   { name: 'Nurul', phone: '6281214614097', displayPhone: '+62 812-1461-4097', role: 'Admin / Keuangan' },

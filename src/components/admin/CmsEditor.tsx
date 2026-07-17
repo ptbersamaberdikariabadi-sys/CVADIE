@@ -25,6 +25,18 @@ export default function CmsEditor({ initialContent }: { initialContent: any }) {
     }));
   };
 
+  // Handle complex nested changes
+  const updateSectionData = (section: string, updater: (draft: any) => void) => {
+    setContent((prev: any) => {
+      const newSectionData = JSON.parse(JSON.stringify(prev[section] || {}));
+      updater(newSectionData);
+      return {
+        ...prev,
+        [section]: newSectionData
+      };
+    });
+  };
+
   // Handle array changes
   const handleArrayChange = (section: string, field: string, index: number, subField: string | null, value: string) => {
     setContent((prev: any) => {
@@ -70,6 +82,19 @@ export default function CmsEditor({ initialContent }: { initialContent: any }) {
     });
   };
 
+  const deleteFileByUrl = async (url: string, bucket: string) => {
+    if (!url || typeof url !== 'string' || !url.includes('supabase.co')) return;
+    try {
+      const parts = url.split('/');
+      const fileName = parts.pop();
+      if (fileName) {
+        await supabase.storage.from(bucket).remove([fileName]);
+      }
+    } catch (error) {
+      console.error("Gagal menghapus file lama:", error);
+    }
+  };
+
   // Handle Image Upload
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, section: string, field: string) => {
     const file = e.target.files?.[0];
@@ -77,6 +102,13 @@ export default function CmsEditor({ initialContent }: { initialContent: any }) {
 
     try {
       setIsSaving(true);
+      
+      // Hapus file lama jika ada
+      const oldUrl = content[section]?.[field];
+      if (oldUrl) {
+        await deleteFileByUrl(oldUrl, 'public-assets');
+      }
+
       const fileExt = file.name.split('.').pop();
       const fileName = `${section}_${field}_${Date.now()}.${fileExt}`;
       
@@ -112,6 +144,13 @@ export default function CmsEditor({ initialContent }: { initialContent: any }) {
 
     try {
       setIsSaving(true);
+
+      // Hapus file lama jika ada
+      const oldUrl = content[section]?.[field]?.[index]?.[subField];
+      if (oldUrl) {
+        await deleteFileByUrl(oldUrl, 'public-assets');
+      }
+
       const fileExt = file.name.split('.').pop();
       const fileName = `${section}_${field}_${index}_${subField}_${Date.now()}.${fileExt}`;
 
@@ -268,6 +307,78 @@ export default function CmsEditor({ initialContent }: { initialContent: any }) {
                     )}
                   </div>
                 </div>
+                <hr className="my-6 border-gray-200" />
+                
+                <div>
+                  <h4 className="text-md font-semibold text-gray-800 mb-3">Daftar Slideshow</h4>
+                  <div className="space-y-4">
+                    {(content['hero_section'].slides as any[])?.map((slide: any, idx: number) => (
+                      <div key={idx} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                        <div className="flex justify-between items-center mb-3">
+                          <span className="text-sm font-semibold text-gray-700">Slide #{idx + 1}</span>
+                          <button
+                            onClick={() => handleArrayRemove('hero_section', 'slides', idx)}
+                            className="p-1 text-red-500 hover:bg-red-50 rounded-md"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Alt Text</label>
+                            <input
+                              type="text"
+                              value={slide.alt || ''}
+                              onChange={(e) => handleArrayChange('hero_section', 'slides', idx, 'alt', e.target.value)}
+                              className="w-full p-2 border border-gray-300 rounded-md text-sm outline-none"
+                            />
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={slide.is_logo || false}
+                              onChange={(e) => {
+                                setContent((prev: any) => {
+                                  const newSlides = [...(prev.hero_section.slides || [])];
+                                  newSlides[idx] = { ...newSlides[idx], is_logo: e.target.checked };
+                                  return { ...prev, hero_section: { ...prev.hero_section, slides: newSlides } };
+                                });
+                              }}
+                              className="w-4 h-4 rounded border-gray-300 text-brand-primary"
+                              id={`slide_logo_${idx}`}
+                            />
+                            <label htmlFor={`slide_logo_${idx}`} className="text-sm text-gray-700">Tampilkan sebagai Logo Tengah (bukan background penuh)</label>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-2">Gambar Slide</label>
+                            {slide.image_url && (
+                              <div className="mb-2 relative w-full h-24 bg-gray-200 rounded-lg overflow-hidden border border-gray-200">
+                                <Image src={slide.image_url} alt="Slide" fill className="object-contain" />
+                              </div>
+                            )}
+                            <div className="flex items-center gap-3">
+                              <label className="cursor-pointer bg-white hover:bg-gray-100 text-gray-700 px-3 py-1.5 rounded-md font-medium text-xs flex items-center gap-1.5 border border-gray-300 transition-colors">
+                                <ImageIcon className="w-3.5 h-3.5" />
+                                {slide.image_url ? 'Ganti Gambar' : 'Unggah Gambar Slide'}
+                                <input
+                                  type="file" accept="image/*" className="hidden"
+                                  onChange={(e) => handleArrayImageUpload(e, 'hero_section', 'slides', idx, 'image_url')}
+                                />
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <button
+                      onClick={() => handleArrayAdd('hero_section', 'slides', { image_url: '', alt: 'Slide Baru', is_logo: false })}
+                      className="text-sm font-medium text-brand-primary flex items-center gap-1 hover:underline"
+                    >
+                      <Plus className="w-4 h-4" /> Tambah Slide Baru
+                    </button>
+                  </div>
+                </div>
+
               </div>
             </div>
           )}
@@ -469,25 +580,204 @@ export default function CmsEditor({ initialContent }: { initialContent: any }) {
             </div>
           )}
 
-          {/* General JSON fallback for remaining tabs */}
-          {(activeTab === 'trust_grid' || activeTab === 'workflow' || activeTab === 'cta_banner' || activeTab === 'about_page') && content[activeTab] && (
+          {/* === TRUST GRID === */}
+          {activeTab === 'trust_grid' && content['trust_grid'] && (
             <div className="space-y-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4 capitalize">Edit {activeTab.replace('_', ' ')}</h3>
-              <p className="text-sm text-gray-500 mb-4">Pengeditan tingkat lanjut via JSON editor (sementara). Pastikan format tidak rusak (tanda kutip dsb).</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Edit Pilar Kepercayaan</h3>
+              <div className="space-y-4">
+                {(content['trust_grid'].items as any[])?.map((item: any, idx: number) => (
+                  <div key={idx} className="border border-gray-200 rounded-lg p-4 bg-gray-50 flex gap-4 items-start">
+                    <div className="flex-1 space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Judul Poin</label>
+                        <input
+                          type="text" value={item.title || ''}
+                          onChange={(e) => handleArrayChange('trust_grid', 'items', idx, 'title', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-md text-sm outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Ikon (Lucide)</label>
+                        <input
+                          type="text" value={item.icon || ''}
+                          onChange={(e) => handleArrayChange('trust_grid', 'items', idx, 'icon', e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded-md text-sm outline-none font-mono"
+                        />
+                      </div>
+                    </div>
+                    <button onClick={() => handleArrayRemove('trust_grid', 'items', idx)} className="p-2 text-red-500 hover:bg-red-50 rounded-md">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => handleArrayAdd('trust_grid', 'items', { title: 'Poin Baru', icon: 'Check' })}
+                  className="text-sm font-medium text-brand-primary flex items-center gap-1 hover:underline"
+                >
+                  <Plus className="w-4 h-4" /> Tambah Poin Baru
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* === CTA BANNER === */}
+          {activeTab === 'cta_banner' && content['cta_banner'] && (
+            <div className="space-y-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Edit Banner CTA Bawah</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Judul Utama</label>
+                  <input type="text" value={content['cta_banner'].title || ''} onChange={(e) => handleChange('cta_banner', 'title', e.target.value)} className="w-full p-3 border border-gray-300 rounded-md focus:ring-brand-primary outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                  <textarea rows={3} value={content['cta_banner'].description || ''} onChange={(e) => handleChange('cta_banner', 'description', e.target.value)} className="w-full p-3 border border-gray-300 rounded-md focus:ring-brand-primary outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Teks Tombol</label>
+                  <input type="text" value={content['cta_banner'].button_text || ''} onChange={(e) => handleChange('cta_banner', 'button_text', e.target.value)} className="w-full p-3 border border-gray-300 rounded-md focus:ring-brand-primary outline-none" />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* === WORKFLOW === */}
+          {activeTab === 'workflow' && content['workflow'] && (
+            <div className="space-y-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Edit Alur Kerja</h3>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Judul Seksi</label>
+                <input type="text" value={content['workflow'].title || ''} onChange={(e) => handleChange('workflow', 'title', e.target.value)} className="w-full p-3 border border-gray-300 rounded-md outline-none" />
+              </div>
+              <div className="space-y-4">
+                {(content['workflow'].steps as any[])?.map((step: any, idx: number) => (
+                  <div key={idx} className="border border-gray-200 rounded-lg p-4 bg-gray-50 flex gap-4 items-start">
+                    <div className="flex-1 space-y-3">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Langkah #{idx+1} - Judul</label>
+                        <input type="text" value={step.title || ''} onChange={(e) => handleArrayChange('workflow', 'steps', idx, 'title', e.target.value)} className="w-full p-2 border border-gray-300 rounded-md text-sm outline-none" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-600 mb-1">Deskripsi</label>
+                        <input type="text" value={step.desc || ''} onChange={(e) => handleArrayChange('workflow', 'steps', idx, 'desc', e.target.value)} className="w-full p-2 border border-gray-300 rounded-md text-sm outline-none" />
+                      </div>
+                    </div>
+                    <button onClick={() => handleArrayRemove('workflow', 'steps', idx)} className="p-2 text-red-500 hover:bg-red-50 rounded-md"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+                <button onClick={() => handleArrayAdd('workflow', 'steps', { title: 'Baru', desc: 'Deskripsi langkah' })} className="text-sm font-medium text-brand-primary flex items-center gap-1 hover:underline"><Plus className="w-4 h-4" /> Tambah Langkah</button>
+              </div>
+            </div>
+          )}
+
+          {/* === ABOUT PAGE === */}
+          {activeTab === 'about_page' && content['about_page'] && (
+            <div className="space-y-8 pb-10">
+              <h3 className="text-xl font-bold text-gray-900">Edit Halaman Tentang Kami</h3>
               
-              <textarea 
-                rows={20}
-                value={JSON.stringify(content[activeTab], null, 2)}
-                onChange={(e) => {
-                  try {
-                    const parsed = JSON.parse(e.target.value);
-                    setContent((prev: any) => ({ ...prev, [activeTab]: parsed }));
-                  } catch {
-                    // Just ignore parsing errors while typing
-                  }
-                }}
-                className="w-full p-4 font-mono text-sm border border-gray-300 rounded-md focus:ring-brand-primary outline-none bg-gray-50"
-              />
+              {/* Hero */}
+              <div className="border border-gray-200 p-4 rounded-lg bg-gray-50 space-y-4">
+                <h4 className="font-semibold text-gray-800">1. Hero Section</h4>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Headline</label>
+                  <input type="text" value={content['about_page'].hero?.headline || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.hero = draft.hero || {}; draft.hero.headline = e.target.value; })} className="w-full p-2 border border-gray-300 rounded-md outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
+                  <textarea rows={3} value={content['about_page'].hero?.description || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.hero = draft.hero || {}; draft.hero.description = e.target.value; })} className="w-full p-2 border border-gray-300 rounded-md outline-none" />
+                </div>
+              </div>
+
+              {/* History */}
+              <div className="border border-gray-200 p-4 rounded-lg bg-gray-50 space-y-4">
+                <h4 className="font-semibold text-gray-800">2. Sejarah Perusahaan</h4>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Judul Sejarah</label>
+                  <input type="text" value={content['about_page'].history?.title || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.history = draft.history || {}; draft.history.title = e.target.value; })} className="w-full p-2 border border-gray-300 rounded-md outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Paragraf Sejarah</label>
+                  {(content['about_page'].history?.paragraphs || []).map((p: string, idx: number) => (
+                    <div key={idx} className="flex gap-2 mb-2">
+                      <textarea rows={3} value={p} onChange={(e) => updateSectionData('about_page', draft => { draft.history.paragraphs[idx] = e.target.value; })} className="w-full p-2 border border-gray-300 rounded-md outline-none" />
+                      <button onClick={() => updateSectionData('about_page', draft => { draft.history.paragraphs.splice(idx, 1); })} className="p-2 text-red-500 hover:bg-red-50 h-10 rounded-md"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                  <button onClick={() => updateSectionData('about_page', draft => { draft.history.paragraphs = draft.history.paragraphs || []; draft.history.paragraphs.push('Paragraf baru...'); })} className="text-sm font-medium text-brand-primary flex items-center gap-1 hover:underline"><Plus className="w-4 h-4" /> Tambah Paragraf</button>
+                </div>
+
+                <hr className="my-4 border-gray-200" />
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Judul Misi & Komitmen</label>
+                  <input type="text" value={content['about_page'].history?.mission_title || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.history = draft.history || {}; draft.history.mission_title = e.target.value; })} className="w-full p-2 border border-gray-300 rounded-md outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Daftar Misi</label>
+                  {(content['about_page'].history?.missions || []).map((m: any, idx: number) => (
+                    <div key={idx} className="flex gap-2 mb-2 p-2 border border-gray-200 rounded-md bg-white">
+                      <div className="flex-1 space-y-2">
+                        <input type="text" value={m.title || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.history.missions[idx].title = e.target.value; })} placeholder="Judul Misi" className="w-full p-2 border border-gray-300 rounded-md outline-none" />
+                        <textarea rows={2} value={m.desc || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.history.missions[idx].desc = e.target.value; })} placeholder="Deskripsi Misi" className="w-full p-2 border border-gray-300 rounded-md outline-none" />
+                      </div>
+                      <button onClick={() => updateSectionData('about_page', draft => { draft.history.missions.splice(idx, 1); })} className="p-2 text-red-500 hover:bg-red-50 rounded-md"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                  <button onClick={() => updateSectionData('about_page', draft => { draft.history.missions = draft.history.missions || []; draft.history.missions.push({ title: 'Baru', desc: '' }); })} className="text-sm font-medium text-brand-primary flex items-center gap-1 hover:underline"><Plus className="w-4 h-4" /> Tambah Misi</button>
+                </div>
+              </div>
+
+              {/* Targets */}
+              <div className="border border-gray-200 p-4 rounded-lg bg-gray-50 space-y-4">
+                <h4 className="font-semibold text-gray-800">3. Target Industri</h4>
+                <input type="text" value={content['about_page'].targets?.title || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.targets = draft.targets || {}; draft.targets.title = e.target.value; })} placeholder="Judul Target" className="w-full p-2 border border-gray-300 rounded-md outline-none mb-2 font-medium" />
+                {(content['about_page'].targets?.items || []).map((item: any, idx: number) => (
+                  <div key={idx} className="border border-gray-200 p-3 rounded bg-white flex gap-3">
+                    <div className="flex-1 space-y-2">
+                      <input type="text" value={item.label || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.targets.items[idx].label = e.target.value; })} placeholder="Nama Target" className="w-full p-2 border rounded-md outline-none" />
+                      <input type="text" value={item.desc || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.targets.items[idx].desc = e.target.value; })} placeholder="Deskripsi Target" className="w-full p-2 border rounded-md outline-none" />
+                    </div>
+                    <button onClick={() => updateSectionData('about_page', draft => { draft.targets.items.splice(idx, 1); })} className="text-red-500 p-2 hover:bg-red-50 rounded-md"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+                <button onClick={() => updateSectionData('about_page', draft => { draft.targets.items = draft.targets.items || []; draft.targets.items.push({ icon:'Target', label:'Baru', desc:'' }); })} className="text-sm font-medium text-brand-primary flex items-center gap-1 hover:underline"><Plus className="w-4 h-4" /> Tambah Target</button>
+              </div>
+
+              {/* Management */}
+              <div className="border border-gray-200 p-4 rounded-lg bg-gray-50 space-y-4">
+                <h4 className="font-semibold text-gray-800">4. Manajemen Inti</h4>
+                <input type="text" value={content['about_page'].management?.title || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.management = draft.management || {}; draft.management.title = e.target.value; })} placeholder="Judul Bagian Manajemen" className="w-full p-2 border border-gray-300 rounded-md outline-none mb-2 font-medium" />
+                {(content['about_page'].management?.items || []).map((item: any, idx: number) => (
+                  <div key={idx} className="border border-gray-200 p-3 rounded bg-white flex gap-3">
+                    <div className="flex-1 space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <input type="text" value={item.name || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.management.items[idx].name = e.target.value; })} placeholder="Nama" className="w-full p-2 border rounded-md outline-none" />
+                        <input type="text" value={item.role || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.management.items[idx].role = e.target.value; })} placeholder="Jabatan" className="w-full p-2 border rounded-md outline-none" />
+                      </div>
+                      <input type="text" value={item.description || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.management.items[idx].description = e.target.value; })} placeholder="Deskripsi Singkat" className="w-full p-2 border rounded-md outline-none" />
+                    </div>
+                    <button onClick={() => updateSectionData('about_page', draft => { draft.management.items.splice(idx, 1); })} className="text-red-500 p-2 hover:bg-red-50 rounded-md"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+                <button onClick={() => updateSectionData('about_page', draft => { draft.management.items = draft.management.items || []; draft.management.items.push({ name:'Baru', role:'', description:'' }); })} className="text-sm font-medium text-brand-primary flex items-center gap-1 hover:underline"><Plus className="w-4 h-4" /> Tambah Personil</button>
+              </div>
+
+              {/* Contacts / Legal */}
+              <div className="border border-gray-200 p-4 rounded-lg bg-gray-50 space-y-4">
+                <h4 className="font-semibold text-gray-800">5. Kontak & Legalitas</h4>
+                <input type="text" value={content['about_page'].legal_contact?.contact_title || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.legal_contact = draft.legal_contact || {}; draft.legal_contact.contact_title = e.target.value; })} placeholder="Judul Bagian Kontak" className="w-full p-2 border border-gray-300 rounded-md outline-none mb-2 font-medium" />
+                {(content['about_page'].legal_contact?.contacts || []).map((item: any, idx: number) => (
+                  <div key={idx} className="border border-gray-200 p-3 rounded bg-white flex gap-3">
+                    <div className="flex-1 space-y-2">
+                      <input type="text" value={item.title || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.legal_contact.contacts[idx].title = e.target.value; })} placeholder="Jenis (Alamat / Telepon)" className="w-full p-2 border rounded-md outline-none" />
+                      <textarea rows={2} value={item.desc || ''} onChange={(e) => updateSectionData('about_page', draft => { draft.legal_contact.contacts[idx].desc = e.target.value; })} placeholder="Detail Kontak" className="w-full p-2 border rounded-md outline-none" />
+                    </div>
+                    <button onClick={() => updateSectionData('about_page', draft => { draft.legal_contact.contacts.splice(idx, 1); })} className="text-red-500 p-2 hover:bg-red-50 rounded-md"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+                <button onClick={() => updateSectionData('about_page', draft => { draft.legal_contact.contacts = draft.legal_contact.contacts || []; draft.legal_contact.contacts.push({ icon:'Phone', title:'', desc:'' }); })} className="text-sm font-medium text-brand-primary flex items-center gap-1 hover:underline"><Plus className="w-4 h-4" /> Tambah Kontak</button>
+              </div>
+
             </div>
           )}
 

@@ -8,9 +8,10 @@ import { Save, Loader2, UploadCloud, FileText } from 'lucide-react';
 type ProductFormProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialData?: any;
+  cmsCategories?: string[];
 };
 
-export default function ProductForm({ initialData }: ProductFormProps) {
+export default function ProductForm({ initialData, cmsCategories = [] }: ProductFormProps) {
   const router = useRouter();
   const supabase = createClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,9 +30,21 @@ export default function ProductForm({ initialData }: ProductFormProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const deleteFileByUrl = async (url: string, bucket: string) => {
+    try {
+      const parts = url.split('/');
+      const fileName = parts.pop();
+      if (fileName) {
+        await supabase.storage.from(bucket).remove([fileName]);
+      }
+    } catch (error) {
+      console.error("Gagal menghapus file lama:", error);
+    }
   };
 
   const uploadFile = async (file: File, bucket: string) => {
@@ -61,10 +74,16 @@ export default function ProductForm({ initialData }: ProductFormProps) {
       let pdfUrl = initialData?.pdf_datasheet_url || null;
 
       if (imageFile) {
+        if (initialData?.image_url) {
+          await deleteFileByUrl(initialData.image_url, 'product-images');
+        }
         imageUrl = await uploadFile(imageFile, 'product-images');
       }
 
       if (pdfFile) {
+        if (initialData?.pdf_datasheet_url) {
+          await deleteFileByUrl(initialData.pdf_datasheet_url, 'pdf-datasheets');
+        }
         pdfUrl = await uploadFile(pdfFile, 'pdf-datasheets');
       }
 
@@ -165,15 +184,34 @@ export default function ProductForm({ initialData }: ProductFormProps) {
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Kategori Utama *</label>
-            <input 
-              type="text" 
-              name="category" 
-              required
-              value={formData.category}
-              onChange={handleInputChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none"
-              placeholder="Ketik Kategori (Contoh: Valve)"
-            />
+            {cmsCategories.length > 0 ? (
+              <select
+                name="category"
+                required
+                value={formData.category}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none bg-white"
+              >
+                <option value="" disabled>Pilih Kategori...</option>
+                {cmsCategories.map((cat, idx) => (
+                  <option key={idx} value={cat}>{cat}</option>
+                ))}
+                {/* Fallback for existing product category not in CMS */}
+                {formData.category && !cmsCategories.includes(formData.category) && (
+                  <option value={formData.category}>{formData.category} (Kategori Lama)</option>
+                )}
+              </select>
+            ) : (
+              <input 
+                type="text" 
+                name="category" 
+                required
+                value={formData.category}
+                onChange={handleInputChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none"
+                placeholder="Ketik Kategori (Contoh: Valve)"
+              />
+            )}
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-700">Sub-Kategori</label>

@@ -1,4 +1,5 @@
 import { CheckCircle, History, Building2, User, FileSignature, MapPin, Phone, Mail, Hammer, ShieldCheck, Factory, Droplet, Wrench } from 'lucide-react'
+import * as Icons from 'lucide-react'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { Metadata } from 'next'
@@ -10,8 +11,11 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600
 
-const IconMap: Record<string, unknown> = {
-  History, Building2, User, FileSignature, MapPin, Phone, Mail, Hammer, ShieldCheck, Factory, Droplet, Wrench
+const getDynamicIcon = (iconName: string | undefined, FallbackIcon: any) => {
+  if (iconName && (Icons as any)[iconName]) {
+    return (Icons as any)[iconName];
+  }
+  return FallbackIcon;
 };
 
 export default async function About() {
@@ -91,7 +95,7 @@ export default async function About() {
         <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="font-serif text-3xl font-bold text-brand-primary mb-6">{content.history.title}</h2>
-            {content.history.paragraphs.map((p: string, idx: number) => (
+            {(content.history?.paragraphs || []).map((p: string, idx: number) => (
               <p key={idx} className="text-gray-600 mb-4 leading-relaxed">
                 {p}
               </p>
@@ -102,7 +106,7 @@ export default async function About() {
               <History className="w-5 h-5 text-brand-accent" /> {content.history.mission_title}
             </h3>
             <div className="space-y-6">
-              {content.history.missions.map((t: Record<string, string>, i: number) => (
+              {(content.history?.missions || []).map((t: Record<string, string>, i: number) => (
                 <div key={i} className="flex gap-4">
                   <div className="mt-1">
                     <CheckCircle className="w-6 h-6 text-brand-primary" />
@@ -123,8 +127,8 @@ export default async function About() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="font-serif text-3xl font-bold mb-12">{content.targets.title}</h2>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6 max-w-5xl mx-auto">
-            {content.targets.items.map((Target: Record<string, string>, idx: number) => {
-              const IconComp = (IconMap[Target.icon] || Factory) as React.ElementType;
+            {(content.targets?.items || []).map((Target: Record<string, string>, idx: number) => {
+              const IconComp = getDynamicIcon(Target.icon, Factory) as React.ElementType;
               return (
                 <div key={idx} className="flex flex-col items-center p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
                   <IconComp className="w-12 h-12 text-brand-accent mb-4" />
@@ -142,7 +146,7 @@ export default async function About() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="font-serif text-3xl font-bold text-brand-primary mb-12">{content.management.title}</h2>
           <div className="flex justify-center flex-wrap gap-8">
-            {content.management.items.map((mgr: Record<string, string>, idx: number) => (
+            {(content.management?.items || []).map((mgr: Record<string, string>, idx: number) => (
               <div key={idx} className="bg-white p-8 rounded-lg shadow-sm border border-gray-100 flex flex-col items-center max-w-sm w-full">
                 <div className="w-24 h-24 bg-brand-primary/10 rounded-full mb-4 flex items-center justify-center">
                   <User className="w-10 h-10 text-brand-primary" />
@@ -165,8 +169,8 @@ export default async function About() {
           <div>
             <h2 className="font-serif text-3xl font-bold text-brand-primary mb-8">{content.legal_contact.legal_title}</h2>
             <div className="flex flex-col gap-4">
-              {content.legal_contact.legals.map((leg: Record<string, string>, idx: number) => {
-                const IconComp = (IconMap[leg.icon] || Building2) as React.ElementType;
+              {(content.legal_contact?.legals || []).map((leg: Record<string, string>, idx: number) => {
+                const IconComp = getDynamicIcon(leg.icon, Building2) as React.ElementType;
                 return (
                   <div key={idx} className="flex items-center gap-4 bg-gray-50 px-6 py-4 rounded-lg border">
                     <IconComp className="w-8 h-8 text-brand-accent" />
@@ -184,8 +188,8 @@ export default async function About() {
           <div>
             <h2 className="font-serif text-3xl font-bold text-brand-primary mb-8">{content.legal_contact.contact_title}</h2>
             <div className="space-y-6 bg-gray-50 p-8 rounded-xl border">
-              {content.legal_contact.contacts.map((cnt: Record<string, string>, idx: number) => {
-                const IconComp = (IconMap[cnt.icon] || MapPin) as React.ElementType;
+              {(content.legal_contact?.contacts || []).map((cnt: Record<string, string>, idx: number) => {
+                const IconComp = getDynamicIcon(cnt.icon, MapPin) as React.ElementType;
                 return (
                   <div key={idx} className="flex items-start gap-4">
                     <IconComp className="w-6 h-6 text-brand-accent shrink-0 mt-1" />
