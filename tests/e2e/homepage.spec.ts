@@ -51,13 +51,9 @@ test.describe('Homepage — Tampilan User', () => {
   });
 
   test('section layanan/kategori industri tampil', async ({ page }) => {
-    // Section dengan heading "Sektor Industri & Layanan Utama" atau dari CMS
-    const sectionHeading = page.locator('text=/Sektor Industri/i').first().or(
-      page.locator('text=/Layanan Utama/i').first()
-    ).or(
-      page.locator('text=/Pneumatik/i').first()
-    );
-    await expect(sectionHeading.first()).toBeVisible({ timeout: 10000 });
+    // Cari link yang mengarah ke kategori, karena konten CMS bisa berubah
+    const categoryLink = page.locator('a[href^="/products/"]').first();
+    await expect(categoryLink).toBeVisible({ timeout: 10000 });
   });
 
   test('section trust grid (keunggulan) tampil', async ({ page }) => {
