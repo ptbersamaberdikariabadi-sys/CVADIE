@@ -72,8 +72,33 @@ export default async function CategoryPage(props: { params: Promise<{ category: 
       })()
     : Array.from(new Set(productList.map(p => p.sub_category).filter(Boolean))) as string[];
 
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": productList.map((prod: any, index: number) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "Product",
+        "name": prod.name,
+        "image": prod.image_url || "https://www.cv-adie.com/logo.jpeg",
+        "description": prod.description,
+        "sku": prod.part_number,
+        "brand": {
+          "@type": "Brand",
+          "name": prod.brand
+        },
+        "category": prod.category
+      }
+    }))
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
       <section className="bg-brand-primary text-white py-12">
         <div className="container mx-auto px-4">
           <Link href="/products" className="inline-flex items-center gap-2 text-brand-accent hover:text-white transition-colors mb-4 text-sm font-bold">
@@ -160,7 +185,7 @@ export default async function CategoryPage(props: { params: Promise<{ category: 
                       <div className="aspect-square bg-gray-50 flex items-center justify-center relative p-6 border-b border-gray-100">
                         {prod.image_url ? (
                           <>
-                            <Image src={prod.image_url} alt={prod.name} fill className="object-contain mix-blend-multiply" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
+                            <Image src={prod.image_url} alt={`${prod.name} - Suku Cadang ${prod.category} ${prod.brand || ''}`} fill className="object-contain mix-blend-multiply" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
                           </>
                         ) : (
                           <Icon className="w-24 h-24 text-gray-300 group-hover:text-brand-primary transition-colors" />

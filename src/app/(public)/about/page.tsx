@@ -78,8 +78,57 @@ export default async function About() {
 
   const content = (cmsData?.content_data as unknown as typeof fallbackContent) || fallbackContent;
 
+  const aboutSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://www.cv-adie.com/#organization",
+        "name": "CV. Abadi Dewana Industrial Equipment",
+        "founder": {
+          "@id": "https://www.cv-adie.com/#founder"
+        }
+      },
+      {
+        "@type": "Person",
+        "@id": "https://www.cv-adie.com/#founder",
+        "name": "Adie Woo",
+        "jobTitle": "Founder & Marketing Director",
+        "worksFor": {
+          "@id": "https://www.cv-adie.com/#organization"
+        },
+        "description": "Memiliki pengalaman lebih dari 15 tahun di industri technical services dan pemasaran suku cadang (sparepart marketing)."
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Apa itu CV. Abadi Dewana Industrial Equipment (CV. ADIE)?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "CV. ADIE didirikan oleh Adie Woo pada tahun 2024. Kami adalah mitra bisnis pengadaan suku cadang industri dengan pengalaman lebih dari 15 tahun di bidang technical services dan pemasaran suku cadang industri."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Apa visi dan misi dari CV. ADIE?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Memberikan penawaran harga terbaik yang kompetitif, memberikan jaminan garansi riil penggantian 100% identik dan pendampingan ekstra, serta berkomitmen menjaga kualitas layanan demi kepercayaan jangka panjang."
+            }
+          }
+        ]
+      }
+    ]
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutSchema) }}
+      />
       {/* Hero */}
       <section className="bg-brand-primary text-white py-20">
         <div className="container mx-auto px-4 text-center">

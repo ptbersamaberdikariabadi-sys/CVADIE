@@ -1,8 +1,49 @@
 import { Globe2, Cog, Wrench, ArrowRight, Activity, ShieldCheck, Zap } from 'lucide-react'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: "Layanan Perbaikan & Solusi Teknis",
+  description: "Layanan perbaikan elektrikal industri, global sourcing komponen langka, dan garansi moral dari CV. ADIE.",
+}
 
 export default function Services() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Apakah ada biaya pengecekan untuk komponen yang rusak?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Tidak, biaya perbaikan hanya ditagihkan APABILA komponen telah diklaim dan terbukti berfungsi dengan baik seperti baru."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Apa yang dimaksud dengan garansi moral?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Jika komponen yang disuplai atau diservis mengalami kendala, CV. ADIE akan menggantinya 100% identik dan mendampingi hingga mesin berjalan normal kembali."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Berapa lama respon untuk permintaan perbaikan (RFQ)?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Tim kami merespon cepat 24 Jam. Proposal solusi disiapkan maksimal dalam 1x24 jam kerja."
+        }
+      }
+    ]
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       {/* Hero Section */}
       <section className="bg-brand-primary text-white py-20">
         <div className="container mx-auto px-4 text-center">

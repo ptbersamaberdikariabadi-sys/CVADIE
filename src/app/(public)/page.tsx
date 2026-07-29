@@ -253,7 +253,7 @@ export default async function Home() {
                   <div key={prod.id || i} className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1 flex flex-col group">
                     <div className="aspect-square bg-gray-50 flex items-center justify-center relative p-6 border-b border-gray-100">
                       {prod.image_url ? (
-                        <Image src={prod.image_url} alt={prod.name} fill className="object-contain mix-blend-multiply" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
+                        <Image src={prod.image_url} alt={`${prod.name} - Suku Cadang ${prod.category} ${prod.brand || ''}`} fill className="object-contain mix-blend-multiply" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
                       ) : (
                         <Icon className="w-24 h-24 text-gray-300 group-hover:text-brand-primary transition-colors" />
                       )}
