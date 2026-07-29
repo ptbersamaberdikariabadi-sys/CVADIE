@@ -12,6 +12,9 @@ import { generateSlug } from '@/utils/slugify'
 export const metadata: Metadata = {
   title: "Katalog Produk & Suku Cadang",
   description: "Jelajahi katalog lengkap suku cadang industri, pneumatic, automasi, mekanikal, dan peralatan pabrik dengan spesifikasi detail dari CV. ADIE.",
+  alternates: {
+    canonical: '/products',
+  },
 };
 
 export const revalidate = 3600 // Regenerate cache every 1 hour (ISR)
@@ -178,9 +181,9 @@ export default async function Products() {
                         <p className="text-xs font-mono text-gray-500 mb-2">PN: {prod.part_number}</p>
                         <p className="text-sm text-gray-500 mb-6 flex-1 leading-relaxed line-clamp-3">{prod.description}</p>
                         <div className="flex items-center gap-2 mt-auto">
-                          <button className="flex-1 text-center border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white font-bold py-2.5 rounded transition-colors text-sm">
+                          <Link href="/rfq" className="flex-1 text-center border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white font-bold py-2.5 rounded transition-colors text-sm">
                             DETAIL
-                          </button>
+                          </Link>
                           <AddToCartButton 
                             product={{
                               id: prod.id,

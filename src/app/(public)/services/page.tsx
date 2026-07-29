@@ -4,6 +4,9 @@ import { Metadata } from 'next'
 export const metadata: Metadata = {
   title: "Layanan Perbaikan & Solusi Teknis",
   description: "Layanan perbaikan elektrikal industri, global sourcing komponen langka, dan garansi moral dari CV. ADIE.",
+  alternates: {
+    canonical: '/services',
+  },
 }
 
 export default function Services() {
@@ -63,7 +66,7 @@ export default function Services() {
               <div className="w-16 h-16 bg-brand-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-brand-primary transition-colors">
                 <Zap className="w-8 h-8 text-brand-primary group-hover:text-white transition-colors" />
               </div>
-              <h3 className="font-bold text-2xl text-gray-900 mb-4">Electrical Repair Services</h3>
+              <h2 className="font-bold text-2xl text-gray-900 mb-4">Electrical Repair Services</h2>
               <p className="text-gray-600 mb-6 leading-relaxed">
                 Layanan perbaikan khusus untuk komponen elektrikal industri seperti <b>PLC, PCB, Monitor Industri, Servo Motor, dan Inverter</b>. 
                 Tim ahli kami menjamin tingkat kesuksesan perbaikan yang tinggi dengan komunikasi yang transparan di setiap tahap perbaikan.
@@ -78,7 +81,7 @@ export default function Services() {
               <div className="w-16 h-16 bg-brand-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-brand-primary transition-colors">
                 <Globe2 className="w-8 h-8 text-brand-primary group-hover:text-white transition-colors" />
               </div>
-              <h3 className="font-bold text-2xl text-gray-900 mb-4">Global Sourcing</h3>
+              <h2 className="font-bold text-2xl text-gray-900 mb-4">Global Sourcing</h2>
               <p className="text-gray-600 mb-6 leading-relaxed">
                 Seringkali teknisi pabrik kelimpungan mencari suku cadang mesin yang sudah <i>discontinue</i> (obsolete) atau langka. Kami menggunakan jaringan global untuk menemukan komponen tersebut dengan <b>harga rasional</b>, menghindarkan Anda dari monopoli harga <i>trader</i> lain.
               </p>
@@ -91,7 +94,7 @@ export default function Services() {
               <div className="w-16 h-16 bg-brand-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-brand-primary transition-colors">
                 <Wrench className="w-8 h-8 text-brand-primary group-hover:text-white transition-colors" />
               </div>
-              <h3 className="font-bold text-2xl text-gray-900 mb-4">Technical & After-Sales (&quot;Garansi Moral&quot;)</h3>
+              <h2 className="font-bold text-2xl text-gray-900 mb-4">Technical & After-Sales (&quot;Garansi Moral&quot;)</h2>
               <p className="text-gray-600 mb-6 leading-relaxed">
                 Kami tidak melepas tanggung jawab setelah barang diterima. Jika komponen yang disuplai atau diservis mengalami kendala pasca-pemasangan, CV. ADIE akan <b>menggantinya 100% identik</b> dan mendampingi hingga mesin dipastikan berjalan normal kembali.
               </p>

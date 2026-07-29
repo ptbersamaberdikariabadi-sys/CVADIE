@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.cv-adie.com'),
+  metadataBase: new URL('https://www.abadidewana.com'),
   title: {
     default: "CV. Abadi Dewana | General Trading & Industrial Equipment",
     template: "%s | CV. ADIE",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "CV. Abadi Dewana | General Trading & Industrial Equipment",
     description: "Mitra Terpercaya Pengadaan Komponen & Peralatan Industri Skala Besar.",
-    url: "https://www.cv-adie.com",
+    url: "https://www.abadidewana.com",
     siteName: "CV. ADIE",
     images: [
       {

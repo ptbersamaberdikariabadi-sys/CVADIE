@@ -11,6 +11,12 @@ import HeroSlideshow from '@/components/layout/HeroSlideshow'
 
 export const revalidate = 3600 // 1 hour, but revalidatePath will clear it instantly on edit
 
+export const metadata = {
+  alternates: {
+    canonical: '/',
+  },
+}
+
 // Icon Mapping helper
 const getDynamicIcon = (iconName: string | undefined, FallbackIcon: any) => {
   if (iconName && (Icons as any)[iconName]) {
@@ -272,9 +278,9 @@ export default async function Home() {
                       <p className="text-xs font-mono text-gray-500 mb-2">PN: {prod.part_number}</p>
                       <p className="text-sm text-gray-500 mb-6 flex-1 leading-relaxed line-clamp-3">{prod.description}</p>
                       <div className="flex items-center gap-2 mt-auto">
-                        <button className="flex-1 text-center border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white font-bold py-2.5 rounded transition-colors text-sm">
+                        <Link href={`/rfq?part_number=${encodeURIComponent(prod.part_number)}`} className="flex-1 text-center border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white font-bold py-2.5 rounded transition-colors text-sm">
                           DETAIL
-                        </button>
+                        </Link>
                         <AddToCartButton 
                           product={{
                             id: prod.id,
