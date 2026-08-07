@@ -59,7 +59,7 @@ export default async function AdminRFQPage() {
                   </td>
                   <td className="p-4">
                     <div className="font-medium text-gray-900">{rfq.company_name}</div>
-                    <div className="text-sm text-gray-500">{rfq.name}</div>
+                    <div className="text-sm text-gray-500">{rfq.contact_person}</div>
                   </td>
                   <td className="p-4">
                     <div className="text-sm text-gray-900">{rfq.email}</div>
@@ -78,7 +78,7 @@ export default async function AdminRFQPage() {
                       <Eye className="w-4 h-4" />
                     </button>
                     <a 
-                      href={`https://wa.me/${(rfq.phone || '').replace(/[^0-9]/g, '')}?text=Halo Bapak/Ibu ${rfq.name} dari ${rfq.company_name}, kami telah menerima permintaan penawaran (RFQ) Anda...`}
+                      href={`https://wa.me/${(rfq.phone || '').replace(/[^0-9]/g, '')}?text=Halo Bapak/Ibu ${rfq.contact_person} dari ${rfq.company_name}, kami telah menerima permintaan penawaran (RFQ) Anda...`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 text-gray-400 hover:text-emerald-600 bg-gray-50 hover:bg-emerald-50 rounded-lg transition-colors inline-flex items-center" 

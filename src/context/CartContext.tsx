@@ -66,7 +66,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
-    if (quantity <= 0) return;
+    if (quantity <= 0) { removeFromCart(productId); return; }
     setCart((prevCart) => 
       prevCart.map(item => 
         item.id === productId ? { ...item, quantity } : item

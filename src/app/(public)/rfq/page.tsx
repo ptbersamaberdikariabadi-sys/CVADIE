@@ -44,7 +44,7 @@ export default function RFQPage() {
       }
 
       // 3. Build WhatsApp Message & Redirect
-      const phoneNumber = "6282127772205"; // 0821-2777-2205
+      const phoneNumber = "6281214614097"; // Admin Nurul: 0812-1461-4097
       
       let itemsText = "";
       if (cart.length > 0) {
@@ -163,7 +163,7 @@ export default function RFQPage() {
                       <Phone className="w-6 h-6 text-brand-accent shrink-0 mt-1" />
                       <div>
                         <div className="font-bold">WhatsApp Fast Response</div>
-                        <div className="text-sm text-gray-300">0821-2777-2205</div>
+                        <div className="text-sm text-gray-300">0812-1461-4097</div>
                       </div>
                     </div>
                     <div className="flex items-start gap-4">
