@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 
-interface FormData {
+interface RFQFormData {
   name: string;
   company: string;
   email: string;
@@ -17,7 +17,7 @@ interface CartItem {
   quantity: number;
 }
 
-export async function submitRFQ(formData: FormData, cartItems: CartItem[]) {
+export async function submitRFQ(formData: RFQFormData, cartItems: CartItem[]) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -31,7 +31,7 @@ export async function submitRFQ(formData: FormData, cartItems: CartItem[]) {
         phone: formData.phone,
         urgency: formData.urgency,
         message: formData.message || (cartItems.length > 0 ? "Pengajuan dari RFQ Cart" : ""),
-        status: 'RFQ_RECEIVED'
+        status: 'Baru'
       }
     ]).select('id').single();
 

@@ -205,9 +205,12 @@ export default async function CategoryPage(props: { params: Promise<{ category: 
                         <p className="text-xs font-mono text-gray-500 mb-2">PN: {prod.part_number}</p>
                         <p className="text-sm text-gray-500 mb-6 flex-1 leading-relaxed line-clamp-3">{prod.description}</p>
                         <div className="flex items-center gap-2 mt-auto">
-                          <button className="flex-1 text-center border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white font-bold py-2.5 rounded transition-colors text-sm">
+                          <Link 
+                            href={prod.sub_category ? `/products/${slug}?sub=${encodeURIComponent(prod.sub_category)}` : `/products/${slug}`}
+                            className="flex-1 text-center border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white font-bold py-2.5 rounded transition-colors text-sm"
+                          >
                             DETAIL
-                          </button>
+                          </Link>
                           <AddToCartButton 
                             product={{
                               id: prod.id,

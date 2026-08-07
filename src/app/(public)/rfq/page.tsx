@@ -20,6 +20,8 @@ export default function RFQPage() {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -33,39 +35,52 @@ export default function RFQPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setFormError(null);
 
     try {
       const result = await submitRFQ(formData, cart);
 
       if (!result.success) {
-        alert(result.error || "Terjadi kesalahan saat menyimpan data RFQ.");
+        setFormError(result.error || "Terjadi kesalahan saat menyimpan data RFQ.");
         setIsSubmitting(false);
         return;
       }
 
-      // 3. Build WhatsApp Message & Redirect
+      // Build WhatsApp Message & Redirect
       const phoneNumber = "6281214614097"; // Admin Nurul: 0812-1461-4097
-      
-      let itemsText = "";
+
+      const messageLines = [
+        `Halo CV. ADIE, saya ingin meminta penawaran (RFQ):`,
+        ``,
+        `*Nama:* ${formData.name}`,
+        `*Perusahaan:* ${formData.company}`,
+        `*Email:* ${formData.email}`,
+        `*No HP:* ${formData.phone}`,
+        `*Tingkat Urgensi:* ${formData.urgency}`,
+      ];
+
       if (cart.length > 0) {
-        itemsText = "%0A%0A*Daftar Produk (Keranjang):*%0A";
+        messageLines.push('', '*Daftar Produk (Keranjang):*');
         cart.forEach((item, index) => {
-          itemsText += `${index + 1}. ${item.name} (PN: ${item.part_number}) - Qty: ${item.quantity}%0A`;
+          messageLines.push(`${index + 1}. ${item.name} (PN: ${item.part_number}) - Qty: ${item.quantity}`);
         });
       }
 
-      const text = `Halo CV. ADIE, saya ingin meminta penawaran (RFQ):%0A%0A*Nama:* ${formData.name}%0A*Perusahaan:* ${formData.company}%0A*Email:* ${formData.email}%0A*No HP:* ${formData.phone}%0A*Tingkat Urgensi:* ${formData.urgency}${itemsText}%0A%0A*Catatan Tambahan:*%0A${formData.message || '-'}`;
-      
+      messageLines.push('', '*Catatan Tambahan:*', formData.message || '-');
+
+      const text = encodeURIComponent(messageLines.join('\n'));
       window.open(`https://wa.me/${phoneNumber}?text=${text}`, '_blank');
-      
+
       // Reset form & cart
       setFormData({
         name: '', company: '', email: '', phone: '', urgency: 'Normal', message: ''
       });
       clearCart();
+      setSubmitted(true);
 
     } catch (err) {
       console.error(err);
+      setFormError('Terjadi kesalahan tidak terduga. Silakan coba lagi.');
     } finally {
       setIsSubmitting(false);
     }
@@ -73,6 +88,17 @@ export default function RFQPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* Banner Sukses */}
+      {submitted && (
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-4 rounded-xl shadow-xl flex items-center gap-3 animate-in slide-in-from-top-4">
+          <MessageCircle className="w-5 h-5 shrink-0" />
+          <div>
+            <p className="font-bold">RFQ Berhasil Dikirim!</p>
+            <p className="text-sm opacity-90">Data tersimpan. Jendela WhatsApp sudah terbuka.</p>
+          </div>
+          <button onClick={() => setSubmitted(false)} className="ml-4 opacity-70 hover:opacity-100">✕</button>
+        </div>
+      )}
       {/* Hero */}
       <section className="bg-brand-primary text-white py-16">
         <div className="container mx-auto px-4 text-center">
@@ -191,6 +217,14 @@ export default function RFQPage() {
               {/* Right Form Panel */}
               <div className="p-8 md:w-7/12">
                 <form onSubmit={handleSubmit} className="space-y-5">
+                  {/* Inline Error Banner */}
+                  {formError && (
+                    <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+                      <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                      <p className="text-sm font-medium">{formError}</p>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">Nama Lengkap PIC</label>
@@ -239,7 +273,9 @@ export default function RFQPage() {
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        type="tel" 
+                        type="tel"
+                        pattern="[0-9+\-\s]{8,15}"
+                        title="Masukkan nomor telepon yang valid (8-15 digit, boleh diawali +62)"
                         className="w-full p-3 border border-gray-300 rounded-md focus:border-brand-primary focus:ring-brand-primary outline-none" 
                         placeholder="08xx-xxxx-xxxx" 
                       />

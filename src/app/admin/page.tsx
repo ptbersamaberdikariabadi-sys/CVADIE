@@ -11,6 +11,12 @@ export default async function AdminDashboard() {
     .from('rfq_requests')
     .select('*', { count: 'exact', head: true });
 
+  // Fetch pending (belum ditanggapi) RFQs
+  const { count: pendingRfqs } = await supabase
+    .from('rfq_requests')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'Baru');
+
   // Fetch Products count
   const { count: totalProducts } = await supabase
     .from('products')
@@ -26,7 +32,7 @@ export default async function AdminDashboard() {
     },
     {
       title: "RFQ Belum Ditanggapi",
-      value: totalRfqs || 0, // Placeholder
+      value: pendingRfqs || 0,
       icon: Users,
       color: "bg-amber-500",
       trend: "Perlu tindakan"
