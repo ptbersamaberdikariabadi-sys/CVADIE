@@ -21,7 +21,17 @@ export const metadata: Metadata = {
     template: "%s | CV. ADIE",
   },
   description: "Mitra Terpercaya Pengadaan Komponen & Peralatan Industri Skala Besar. Menjamin downtime pabrik teratasi secara efisien melalui jaringan global sourcing.",
-  keywords: ["Distributor Valve Indonesia", "Suku Cadang Pabrik", "Industrial Equipment", "General Trading", "Pneumatik", "Kompresor", "Otomasi Industri"],
+  keywords: [
+    // Merek utama yang dijual
+    "FESTO Indonesia", "SMC Pneumatic", "CKD Valve", "RBCA Inverter", "DeWALT Indonesia",
+    // Kategori produk
+    "Distributor Solenoid Valve Indonesia", "Suku Cadang Pabrik", "Industrial Equipment",
+    "Pneumatik Indonesia", "Kompresor Industri", "Otomasi PLC", "Inverter Industri",
+    "Suku Cadang Tekstil", "Komponen Mesin Pabrik", "General Trading Industri",
+    // Intent
+    "beli spare part industri", "harga solenoid valve", "distributor pneumatik Bandung",
+    "pengadaan komponen industri B2B", "part number industri Indonesia",
+  ],
   openGraph: {
     title: "CV. Abadi Dewana | General Trading & Industrial Equipment",
     description: "Mitra Terpercaya Pengadaan Komponen & Peralatan Industri Skala Besar.",
@@ -50,40 +60,57 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "CV. Abadi Dewana Industrial Equipment",
-    "alternateName": "CV. ADIE",
-    "url": "https://www.cv-adie.com",
-    "logo": "https://www.cv-adie.com/logo.jpeg",
-    "description": "Distributor and general trading company specializing in industrial equipment, pneumatics, automation, and mechanical components in Indonesia.",
-    "knowsAbout": ["Industrial Valves", "Pneumatic Cylinders", "PLC Automation", "Industrial Sensors", "Textile Machinery Parts", "Global Sourcing"],
-    "areaServed": {
-      "@type": "Country",
-      "name": "Indonesia"
-    },
-    "contactPoint": {
-      "@type": "ContactPoint",
-      "telephone": "+62-821-2777-2205",
-      "contactType": "customer service",
-      "areaServed": "ID",
-      "availableLanguage": "Indonesian"
-    },
-    "sameAs": [
-      "https://www.linkedin.com/company/cv-abadi-dewana",
-      "https://www.facebook.com/cv.abadidewana"
-    ],
-    "makesOffer": [
-      {
-        "@type": "Offer",
-        "itemOffered": {
-          "@type": "Service",
-          "name": "B2B Industrial Equipment Supplier"
-        }
-      }
-    ]
-  };
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "CV. Abadi Dewana Industrial Equipment",
+      "alternateName": "CV. ADIE",
+      "url": "https://www.abadidewana.com",
+      "logo": "https://www.abadidewana.com/logo.jpeg",
+      "image": "https://www.abadidewana.com/logo.jpeg",
+      "description": "Distributor dan general trading company spesialis komponen industri, pneumatik, otomasi, dan suku cadang pabrik di Indonesia. Melayani B2B dengan garansi riil dan harga kompetitif.",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Rancaekek",
+        "addressLocality": "Kabupaten Bandung",
+        "addressRegion": "Jawa Barat",
+        "addressCountry": "ID"
+      },
+      "telephone": "+6281214614097",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+6281214614097",
+        "contactType": "customer service",
+        "areaServed": "ID",
+        "availableLanguage": "Indonesian"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "Indonesia"
+      },
+      "knowsAbout": [
+        "Industrial Valves", "Solenoid Valve FESTO", "SMC Pneumatic", "CKD Valve",
+        "Pneumatic Cylinders", "PLC Automation", "Industrial Inverter RBCA",
+        "Industrial Sensors", "Textile Machinery Parts", "Global Sourcing",
+        "Spare Part Mesin Pabrik", "Komponen Otomasi Industri"
+      ],
+      "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Katalog Suku Cadang Industri",
+        "itemListElement": [
+          { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Solenoid Valve & Pneumatik" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Inverter & PLC Otomasi" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Product", "name": "Suku Cadang Tekstil" } },
+          { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Perbaikan Elektrikal (PLC, PCB, Servo)" } }
+        ]
+      },
+      "sameAs": [
+        "https://www.linkedin.com/company/cv-abadi-dewana",
+        "https://www.facebook.com/cv.abadidewana"
+      ]
+    }
+  ];
 
   return (
     <html

@@ -10,8 +10,16 @@ import Link from 'next/link'
 import { generateSlug } from '@/utils/slugify'
 
 export const metadata: Metadata = {
-  title: "Katalog Produk & Suku Cadang",
-  description: "Jelajahi katalog lengkap suku cadang industri, pneumatic, automasi, mekanikal, dan peralatan pabrik dengan spesifikasi detail dari CV. ADIE.",
+  title: "Katalog Produk & Suku Cadang Industri",
+  description: "Katalog lengkap suku cadang industri: Solenoid Valve FESTO, SMC, CKD; Inverter & PLC RBCA; Komponen Tekstil; Pneumatik & Kompresor. Part number original. Hubungi CV. ADIE untuk penawaran B2B.",
+  keywords: [
+    "katalog suku cadang industri", "spare part pabrik",
+    "solenoid valve FESTO", "SMC pneumatic Indonesia", "CKD valve",
+    "inverter RBCA", "PLC industri", "proximity sensor",
+    "komponen tekstil spinning dyeing", "kompresor Elite Air",
+    "part number industri", "kode material mesin pabrik",
+    "CV ADIE Bandung", "distributor industrial equipment Indonesia",
+  ],
   alternates: {
     canonical: '/products',
   },
@@ -78,8 +86,12 @@ export default async function Products() {
       />
       <section className="bg-brand-primary text-white py-12">
         <div className="container mx-auto px-4">
-          <h1 className="font-serif text-3xl md:text-4xl font-bold mb-4">Katalog Produk</h1>
-          <p className="text-gray-200">Eksplorasi komponen spesifik industri, otomasi, dan suku cadang pabrik.</p>
+          <h1 className="font-serif text-3xl md:text-4xl font-bold mb-3">Katalog Produk & Suku Cadang Industri</h1>
+          <p className="text-gray-200 max-w-3xl text-sm leading-relaxed">
+            CV. ADIE menyediakan suku cadang industri original dari brand terpercaya seperti <strong>FESTO, SMC, CKD, RBCA, DeWALT, Elite Air</strong>.
+            Melayani pengadaan B2B untuk pabrik tekstil, otomotif, makanan, dan water treatment di seluruh Indonesia.
+            Cari berdasarkan part number, nama produk, atau kategori.
+          </p>
         </div>
       </section>
 
@@ -181,7 +193,7 @@ export default async function Products() {
                         <p className="text-xs font-mono text-gray-500 mb-2">PN: {prod.part_number}</p>
                         <p className="text-sm text-gray-500 mb-6 flex-1 leading-relaxed line-clamp-3">{prod.description}</p>
                         <div className="flex items-center gap-2 mt-auto">
-                          <Link href={`/products/${generateSlug(prod.category)}`} className="flex-1 text-center border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white font-bold py-2.5 rounded transition-colors text-sm">
+                          <Link href={`/products/${generateSlug(prod.category)}/${prod.id}`} className="flex-1 text-center border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white font-bold py-2.5 rounded transition-colors text-sm">
                             DETAIL
                           </Link>
                           <AddToCartButton 
