@@ -22,9 +22,13 @@ export async function submitRFQ(formData: RFQFormData, cartItems: CartItem[]) {
   const supabase = createClient(cookieStore);
 
   try {
+    // Generate UUID manually so we don't need to .select() which is blocked by RLS for public
+    const rfqId = crypto.randomUUID();
+
     // 1. Insert ke database Supabase
-    const { data: rfqData, error } = await supabase.from('rfq_requests').insert([
+    const { error } = await supabase.from('rfq_requests').insert([
       {
+        id: rfqId,
         contact_person: formData.name,
         company_name: formData.company,
         email: formData.email,
@@ -33,17 +37,17 @@ export async function submitRFQ(formData: RFQFormData, cartItems: CartItem[]) {
         message: formData.message || (cartItems.length > 0 ? "Pengajuan dari RFQ Cart" : ""),
         status: 'RFQ_RECEIVED'
       }
-    ]).select('id').single();
+    ]);
 
-    if (error || !rfqData) {
+    if (error) {
       console.error("Gagal mengirim RFQ ke database:", error);
-      return { success: false, error: 'Terjadi kesalahan saat menyimpan data RFQ.' };
+      return { success: false, error: error?.message || 'Terjadi kesalahan saat menyimpan data RFQ.' };
     }
 
     // 2. Insert RFQ Items
     if (cartItems.length > 0) {
       const rfqItemsData = cartItems.map(item => ({
-        rfq_id: rfqData.id,
+        rfq_id: rfqId,
         product_id: item.id,
         quantity: item.quantity,
         notes: ''
@@ -56,7 +60,7 @@ export async function submitRFQ(formData: RFQFormData, cartItems: CartItem[]) {
       }
     }
 
-    return { success: true, data: rfqData };
+    return { success: true, data: { id: rfqId } };
   } catch (err: unknown) {
     const error = err as Error;
     console.error("Error submitting RFQ:", error);
