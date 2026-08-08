@@ -15,7 +15,7 @@ export default async function AdminDashboard() {
   const { count: pendingRfqs } = await supabase
     .from('rfq_requests')
     .select('*', { count: 'exact', head: true })
-    .eq('status', 'Baru');
+    .eq('status', 'RFQ_RECEIVED');
 
   // Fetch Products count
   const { count: totalProducts } = await supabase

@@ -31,7 +31,7 @@ export async function submitRFQ(formData: RFQFormData, cartItems: CartItem[]) {
         phone: formData.phone,
         urgency: formData.urgency,
         message: formData.message || (cartItems.length > 0 ? "Pengajuan dari RFQ Cart" : ""),
-        status: 'Baru'
+        status: 'RFQ_RECEIVED'
       }
     ]).select('id').single();
 
