@@ -2,6 +2,7 @@
 
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 
 interface RFQFormData {
   name: string;
@@ -78,6 +79,10 @@ export async function deleteRFQ(rfqId: string) {
       console.error("Gagal menghapus RFQ:", error);
       return { success: false, error: error.message };
     }
+    
+    // Refresh Next.js server cache untuk halaman ini
+    revalidatePath('/admin/rfq');
+    
     return { success: true };
   } catch (err: unknown) {
     const error = err as Error;
