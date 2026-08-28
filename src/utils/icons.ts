@@ -14,7 +14,7 @@ export const getDynamicIcon = (
   FallbackIcon: any
 ): React.ElementType => {
   if (iconName && (Icons as Record<string, unknown>)[iconName]) {
-    return (Icons as Record<string, React.ElementType>)[iconName];
+    return (Icons as unknown as Record<string, React.ElementType>)[iconName];
   }
   return FallbackIcon;
 };
