@@ -87,9 +87,25 @@ export default function ProductForm({ initialData, cmsCategories = [] }: Product
         pdfUrl = await uploadFile(pdfFile, 'pdf-datasheets');
       }
 
+      let normalizedSubCategory = formData.sub_category.trim();
+      const lowerSub = normalizedSubCategory.toLowerCase();
+      
+      // Standarisasi sub-kategori seperti permintaan (Simplex, Drawing, dll)
+      if (lowerSub.includes('simplex') || lowerSub === 'simplex/roving') {
+        normalizedSubCategory = 'Simplex';
+      } else if (lowerSub.includes('drawing')) {
+        normalizedSubCategory = 'Drawing';
+      } else if (normalizedSubCategory) {
+        // Title Case untuk sub-kategori lainnya agar rapi
+        normalizedSubCategory = normalizedSubCategory.split(' ')
+          .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .join(' ');
+      }
+
       const payload = {
         ...formData,
-        stock: parseInt(formData.stock.toString()),
+        sub_category: normalizedSubCategory,
+        stock: parseInt(formData.stock.toString()) || 0,
         image_url: imageUrl,
         pdf_datasheet_url: pdfUrl,
       };
