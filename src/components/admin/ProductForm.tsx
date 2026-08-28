@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { Save, Loader2, UploadCloud, FileText } from 'lucide-react';
 
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
+const MAX_PDF_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+const ALLOWED_PDF_TYPES = ['application/pdf'];
+
 type ProductFormProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialData?: any;
@@ -47,9 +52,19 @@ export default function ProductForm({ initialData, cmsCategories = [] }: Product
     }
   };
 
+  const validateFile = (file: File, maxSize: number, allowedTypes: string[]): string | null => {
+    if (!allowedTypes.includes(file.type)) {
+      return `Tipe file tidak didukung: ${file.type}. Tipe yang diizinkan: ${allowedTypes.join(', ')}`;
+    }
+    if (file.size > maxSize) {
+      return `Ukuran file terlalu besar: ${(file.size / 1024 / 1024).toFixed(1)}MB. Maksimal: ${(maxSize / 1024 / 1024).toFixed(0)}MB`;
+    }
+    return null;
+  };
+
   const uploadFile = async (file: File, bucket: string) => {
     const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+    const fileName = `${crypto.randomUUID()}_${Date.now()}.${fileExt}`;
     
     const { error } = await supabase.storage
       .from(bucket)
@@ -74,6 +89,8 @@ export default function ProductForm({ initialData, cmsCategories = [] }: Product
       let pdfUrl = initialData?.pdf_datasheet_url || null;
 
       if (imageFile) {
+        const imageError = validateFile(imageFile, MAX_IMAGE_SIZE, ALLOWED_IMAGE_TYPES);
+        if (imageError) { setError(imageError); setIsSubmitting(false); return; }
         if (initialData?.image_url) {
           await deleteFileByUrl(initialData.image_url, 'product-images');
         }
@@ -81,6 +98,8 @@ export default function ProductForm({ initialData, cmsCategories = [] }: Product
       }
 
       if (pdfFile) {
+        const pdfError = validateFile(pdfFile, MAX_PDF_SIZE, ALLOWED_PDF_TYPES);
+        if (pdfError) { setError(pdfError); setIsSubmitting(false); return; }
         if (initialData?.pdf_datasheet_url) {
           await deleteFileByUrl(initialData.pdf_datasheet_url, 'pdf-datasheets');
         }

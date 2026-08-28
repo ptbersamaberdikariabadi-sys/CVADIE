@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
+import { WHATSAPP_CONTACTS, getWhatsAppUrl } from '@/utils/contacts'
 
 export default async function Footer() {
   const cookieStore = await cookies()
@@ -24,13 +25,6 @@ export default async function Footer() {
   // Nomor telepon kantor baru
   const phoneInfo = contacts.find((c: { title: string }) => c.title.includes('Telepon'))?.desc
     || "(0261) 2142579";
-
-  const waContacts = [
-    { name: 'Fuja', phone: '6283847582958', displayPhone: '+62 838-4758-2958', role: 'Admin / Support' },
-    { name: 'Ihsan', phone: '6282116381296', displayPhone: '+62 821-1638-1296', role: 'Teknisi / Support' },
-    { name: 'Nurul', phone: '6281214614097', displayPhone: '+62 812-1461-4097', role: 'Admin / Keuangan' },
-    { name: 'Zeinan', phone: '6285700363571', displayPhone: '+62 857-0036-3571', role: 'IT / Support' },
-  ];
 
   return (
     <footer className="bg-brand-primary text-white py-12">
@@ -61,11 +55,11 @@ export default async function Footer() {
             <li className="flex flex-col">
               <span className="font-bold text-white mb-2">WhatsApp:</span>
               <div className="grid grid-cols-2 gap-x-2 gap-y-3 mt-1">
-                {waContacts.map((contact, idx) => (
+                {WHATSAPP_CONTACTS.map((contact, idx) => (
                   <div key={idx} className="flex flex-col">
                     <span className="text-[10px] text-gray-400 mb-0.5 leading-tight">{contact.name} ({contact.role.split('/')[0].trim()})</span>
                     <a
-                      href={`https://wa.me/${contact.phone}?text=Halo%20${contact.name},%20saya%20ingin%20bertanya%20mengenai%20produk%20dari%20CV.%20ADIE`}
+                      href={getWhatsAppUrl(contact)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="hover:text-brand-accent transition-colors text-xs font-medium"

@@ -60,26 +60,32 @@ export default async function AdminSettingsPage() {
               <hr className="border-gray-100 my-4" />
 
               <div className="space-y-4">
-                <h4 className="text-sm font-medium text-gray-900">Ubah Kata Sandi</h4>
-                <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium text-gray-900">Ubah Kata Sandi</h4>
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md font-medium">Segera Hadir</span>
+                </div>
+                <div className="space-y-2 opacity-50 pointer-events-none">
                   <label className="text-sm text-gray-600">Kata Sandi Baru</label>
                   <input 
                     type="password" 
                     placeholder="••••••••"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none"
+                    disabled
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-2 opacity-50 pointer-events-none">
                   <label className="text-sm text-gray-600">Konfirmasi Kata Sandi Baru</label>
                   <input 
                     type="password" 
                     placeholder="••••••••"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none"
+                    disabled
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50"
                   />
                 </div>
-                <button className="bg-gray-900 hover:bg-gray-800 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                <button disabled className="bg-gray-400 text-white px-4 py-2 rounded-lg text-sm font-medium cursor-not-allowed opacity-50">
                   Perbarui Kata Sandi
                 </button>
+                <p className="text-xs text-gray-500">Fitur ubah kata sandi akan tersedia di pembaruan sistem berikutnya.</p>
               </div>
             </div>
           </div>

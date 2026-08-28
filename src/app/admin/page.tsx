@@ -46,10 +46,10 @@ export default async function AdminDashboard() {
     },
     {
       title: "Estimasi Konversi",
-      value: "15%",
+      value: "—",
       icon: TrendingUp,
       color: "bg-indigo-500",
-      trend: "Rata-rata"
+      trend: "Segera hadir"
     }
   ];
 
@@ -79,24 +79,13 @@ export default async function AdminDashboard() {
         <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 p-6 h-96 flex flex-col items-center justify-center text-gray-400">
           <TrendingUp className="w-12 h-12 mb-4 text-gray-300" />
           <p>Grafik Tren RFQ akan tampil di sini</p>
+          <p className="text-xs text-gray-300 mt-2">(Segera hadir)</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <h3 className="text-lg font-bold text-gray-900 mb-4">Aktivitas Terkini</h3>
-          <div className="space-y-4">
-            <div className="flex gap-4">
-              <div className="w-2 h-2 mt-2 rounded-full bg-blue-500"></div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">RFQ Baru dari PT Testing</p>
-                <p className="text-xs text-gray-500">2 jam yang lalu</p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <div className="w-2 h-2 mt-2 rounded-full bg-emerald-500"></div>
-              <div>
-                <p className="text-sm font-medium text-gray-900">Katalog diperbarui</p>
-                <p className="text-xs text-gray-500">Kemarin</p>
-              </div>
-            </div>
+          <div className="flex flex-col items-center justify-center text-gray-400 py-8">
+            <p className="text-sm">Belum ada aktivitas tercatat.</p>
+            <p className="text-xs text-gray-300 mt-1">(Fitur log aktivitas segera hadir)</p>
           </div>
         </div>
       </div>

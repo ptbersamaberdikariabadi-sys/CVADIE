@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     siteName: "CV. ADIE",
     images: [
       {
-        url: "https://www.cv-adie.com/logo.jpeg",
+        url: "https://www.abadidewana.com/logo.jpeg",
         width: 800,
         height: 600,
       },
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "CV. Abadi Dewana",
     description: "Mitra Terpercaya Pengadaan Komponen Industri Skala Besar.",
-    images: ["https://www.cv-adie.com/logo.jpeg"],
+    images: ["https://www.abadidewana.com/logo.jpeg"],
   },
 };
 

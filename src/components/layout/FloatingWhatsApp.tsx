@@ -2,14 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X } from 'lucide-react';
+import { WHATSAPP_CONTACTS, getWhatsAppUrl } from '@/utils/contacts';
 
-// Hapus "Adie Woo" — hanya tampilkan tim yang relevan
-const contacts = [
-  { name: 'Fuja', phone: '6283847582958', displayPhone: '+62 838-4758-2958', role: 'Admin / Support' },
-  { name: 'Ihsan', phone: '6282116381296', displayPhone: '+62 821-1638-1296', role: 'Teknisi / Support' },
-  { name: 'Nurul', phone: '6281214614097', displayPhone: '+62 812-1461-4097', role: 'Admin / Keuangan' },
-  { name: 'Zeinan', phone: '6285700363571', displayPhone: '+62 857-0036-3571', role: 'IT / Support' },
-];
 
 export default function FloatingWhatsApp() {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,10 +45,10 @@ export default function FloatingWhatsApp() {
         </div>
         <div className="p-2 max-h-80 overflow-y-auto">
           <div className="space-y-1">
-            {contacts.map((contact, index) => (
+            {WHATSAPP_CONTACTS.map((contact, index) => (
               <a 
                 key={index}
-                href={`https://wa.me/${contact.phone}?text=Halo%20${contact.name},%20saya%20ingin%20bertanya%20mengenai%20produk%20dari%20CV.%20ADIE`}
+                href={getWhatsAppUrl(contact)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl transition-colors group"

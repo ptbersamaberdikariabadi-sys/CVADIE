@@ -2,13 +2,12 @@
 
 import { Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { deleteProduct } from "@/app/actions/productActions";
 
 export default function ProductActions({ productId }: { productId: string }) {
   const router = useRouter();
-  const supabase = createClient();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -18,13 +17,12 @@ export default function ProductActions({ productId }: { productId: string }) {
 
     setIsDeleting(true);
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', productId);
-        
-      if (error) throw error;
-      router.refresh();
+      const result = await deleteProduct(productId);
+      if (result.success) {
+        router.refresh();
+      } else {
+        alert(`Gagal menghapus produk: ${result.error}`);
+      }
     } catch (err) {
       console.error("Failed to delete product:", err);
       alert("Gagal menghapus produk.");
@@ -53,3 +51,4 @@ export default function ProductActions({ productId }: { productId: string }) {
     </>
   );
 }
+

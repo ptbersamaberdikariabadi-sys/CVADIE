@@ -22,6 +22,30 @@ export async function submitRFQ(formData: RFQFormData, cartItems: CartItem[]) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
+  // Input validation
+  const name = formData.name?.trim();
+  const company = formData.company?.trim();
+  const email = formData.email?.trim().toLowerCase();
+  const phone = formData.phone?.trim();
+  const urgency = formData.urgency?.trim();
+  const message = formData.message?.trim();
+
+  if (!name || name.length < 2 || name.length > 200) {
+    return { success: false, error: 'Nama kontak harus antara 2-200 karakter.' };
+  }
+  if (!company || company.length < 2 || company.length > 200) {
+    return { success: false, error: 'Nama perusahaan harus antara 2-200 karakter.' };
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { success: false, error: 'Format email tidak valid.' };
+  }
+  if (!phone || phone.length < 8 || phone.length > 20) {
+    return { success: false, error: 'Nomor telepon harus antara 8-20 karakter.' };
+  }
+  if (message && message.length > 2000) {
+    return { success: false, error: 'Pesan terlalu panjang (maksimal 2000 karakter).' };
+  }
+
   try {
     // Generate UUID manually so we don't need to .select() which is blocked by RLS for public
     const rfqId = crypto.randomUUID();
@@ -30,15 +54,16 @@ export async function submitRFQ(formData: RFQFormData, cartItems: CartItem[]) {
     const { error } = await supabase.from('rfq_requests').insert([
       {
         id: rfqId,
-        contact_person: formData.name,
-        company_name: formData.company,
-        email: formData.email,
-        phone: formData.phone,
-        urgency: formData.urgency,
-        message: formData.message || (cartItems.length > 0 ? "Pengajuan dari RFQ Cart" : ""),
+        contact_person: name,
+        company_name: company,
+        email: email,
+        phone: phone,
+        urgency: urgency,
+        message: message || (cartItems.length > 0 ? "Pengajuan dari RFQ Cart" : ""),
         status: 'RFQ_RECEIVED'
       }
     ]);
+
 
     if (error) {
       console.error("Gagal mengirim RFQ ke database:", error);
@@ -72,6 +97,12 @@ export async function submitRFQ(formData: RFQFormData, cartItems: CartItem[]) {
 export async function deleteRFQ(rfqId: string) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
+
+  // Auth guard — hanya admin yang bisa menghapus RFQ
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: 'Unauthorized — Anda harus login terlebih dahulu.' };
+  }
 
   try {
     const { error } = await supabase.from('rfq_requests').delete().eq('id', rfqId);
