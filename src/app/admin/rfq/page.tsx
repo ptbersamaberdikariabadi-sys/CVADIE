@@ -14,12 +14,16 @@ export default async function AdminRFQPage() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'Baru':
+      case 'RFQ_RECEIVED':
         return <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">Baru</span>;
-      case 'Negosiasi':
-        return <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">Negosiasi</span>;
-      case 'Selesai':
-        return <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">Selesai</span>;
+      case 'QUOTATION_SENT':
+        return <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">Penawaran Dikirim</span>;
+      case 'PO_RECEIVED':
+        return <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">PO Diterima</span>;
+      case 'DELIVERY_ORDER':
+        return <span className="px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">Dikirim</span>;
+      case 'INVOICED':
+        return <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">Selesai (Invoiced)</span>;
       default:
         return <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">{status || 'Baru'}</span>;
     }
