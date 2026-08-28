@@ -1,5 +1,6 @@
-import { CheckCircle, History, Building2, User, FileSignature, MapPin, Phone, Mail, Hammer, ShieldCheck, Factory, Droplet, Wrench } from 'lucide-react'
-import * as Icons from 'lucide-react'
+import { CheckCircle, History, Building2, User, MapPin, Factory } from 'lucide-react'
+import { getDynamicIcon } from '@/utils/icons'
+import { CMSAboutPage } from '@/types/cms'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { Metadata } from 'next'
@@ -14,12 +15,7 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600
 
-const getDynamicIcon = (iconName: string | undefined, FallbackIcon: any) => {
-  if (iconName && (Icons as any)[iconName]) {
-    return (Icons as any)[iconName];
-  }
-  return FallbackIcon;
-};
+// getDynamicIcon utility removed in favor of shared util
 
 export default async function About() {
   const cookieStore = await cookies()
@@ -79,7 +75,7 @@ export default async function About() {
     }
   };
 
-  const content = (cmsData?.content_data as unknown as typeof fallbackContent) || fallbackContent;
+  const content = (cmsData?.content_data as CMSAboutPage) || fallbackContent;
 
   const aboutSchema = {
     "@context": "https://schema.org",

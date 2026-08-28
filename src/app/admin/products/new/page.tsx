@@ -11,7 +11,7 @@ export default async function NewProductPage() {
   // Fetch categories from CMS
   const { data: cmsData } = await supabase.from('cms_content').select('content_data').eq('section_key', 'services').single();
   const services = cmsData?.content_data?.items || [];
-  const cmsCategories = services.map((s: any) => s.title);
+  const cmsCategories = services.map((s: { title: string }) => s.title);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

@@ -4,15 +4,18 @@ import { Search } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
-export default function ProductSearch({ initialQuery = '' }: { initialQuery?: string }) {
+export default function ProductSearch() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [query, setQuery] = useState(initialQuery)
+  const qParam = searchParams.get('q') || ''
+  const [query, setQuery] = useState(qParam)
+  const [prevParam, setPrevParam] = useState(qParam)
 
-  // Sync state if URL changes externally
-  useEffect(() => {
-    setQuery(searchParams.get('q') || '')
-  }, [searchParams])
+  // Sync state if URL changes externally (e.g. back button)
+  if (qParam !== prevParam) {
+    setPrevParam(qParam)
+    setQuery(qParam)
+  }
 
   // Debounce the update to URL
   useEffect(() => {

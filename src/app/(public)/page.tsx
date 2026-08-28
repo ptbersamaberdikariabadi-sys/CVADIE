@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from 'next/link'
 import Image from 'next/image'
-import { Award, Headphones, ArrowRight, CheckCircle2, Factory, Package, Activity, Wrench, Zap, Upload, FileCheck2, Cpu, Wind, Cog } from 'lucide-react'
-import * as Icons from 'lucide-react'
+import { Award, ArrowRight, CheckCircle2, Package, Activity, Wrench, Zap, Upload, Cpu, Wind, Cog } from 'lucide-react'
+import { getDynamicIcon } from '@/utils/icons'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { generateSlug } from '@/utils/slugify'
@@ -17,20 +17,13 @@ export const metadata = {
   },
 }
 
-// Icon Mapping helper
-const getDynamicIcon = (iconName: string | undefined, FallbackIcon: any) => {
-  if (iconName && (Icons as any)[iconName]) {
-    return (Icons as any)[iconName];
-  }
-  return FallbackIcon;
-};
-
+// getDynamicIcon imported from @/utils/icons
 const getCategoryIcon = (category: string) => {
-  if (category?.includes('Pneumatik')) return (Icons as any).Wind || Wind;
-  if (category?.includes('Otomatisasi') || category?.includes('Elektronik')) return (Icons as any).Cpu || Cpu;
-  if (category?.includes('Elektrikal')) return (Icons as any).Activity || Activity;
-  if (category?.includes('Tekstil')) return (Icons as any).Cog || Cog;
-  if (category?.includes('Perkakas')) return (Icons as any).Wrench || Wrench;
+  if (category?.includes('Pneumatik')) return Wind;
+  if (category?.includes('Otomatisasi') || category?.includes('Elektronik')) return Cpu;
+  if (category?.includes('Elektrikal')) return Activity;
+  if (category?.includes('Tekstil')) return Cog;
+  if (category?.includes('Perkakas')) return Wrench;
   return Package;
 }
 

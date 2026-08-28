@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Filter, Search, Package } from 'lucide-react'
+import { Package } from 'lucide-react'
 import * as Icons from 'lucide-react'
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
@@ -124,7 +124,7 @@ export default async function Products({ searchParams }: Props) {
           {/* Product Grid */}
           <div className="flex-1">
             <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-              <ProductSearch initialQuery={q || ''} />
+              <ProductSearch />
               <div className="text-sm text-gray-500 font-medium shrink-0">
                 Menampilkan {productList.length > 0 ? `1-${productList.length}` : '0'} dari {productList.length} Produk
               </div>

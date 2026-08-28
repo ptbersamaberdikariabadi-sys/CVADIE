@@ -44,16 +44,26 @@ export interface CMSCTASection {
 }
 
 export interface CMSAboutPage {
-  company_profile: {
-    title: string;
-    desc: string[];
-    mission: string;
-    vision: string;
-    image_url?: string;
+  hero: { headline: string; description: string; };
+  history: { 
+    title: string; 
+    paragraphs: string[]; 
+    mission_title: string; 
+    missions: { title: string; desc: string; }[]; 
   };
-  legal_contact: {
-    title: string;
-    contacts: { title: string; desc: string; icon: string }[];
+  targets: { 
+    title: string; 
+    items: { icon: string; label: string; desc: string; }[]; 
+  };
+  management: { 
+    title: string; 
+    items: { name: string; role: string; description: string; }[]; 
+  };
+  legal_contact: { 
+    legal_title: string; 
+    legals: { icon: string; title: string; desc: string; }[]; 
+    contact_title: string; 
+    contacts: { icon: string; title: string; desc: string; }[]; 
   };
 }
 
