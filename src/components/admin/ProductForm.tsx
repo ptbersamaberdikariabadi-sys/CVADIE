@@ -98,7 +98,7 @@ export default function ProductForm({ initialData, cmsCategories = [] }: Product
       } else if (normalizedSubCategory) {
         // Title Case untuk sub-kategori lainnya agar rapi
         normalizedSubCategory = normalizedSubCategory.split(' ')
-          .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+          .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
           .join(' ');
       }
 
