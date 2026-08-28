@@ -67,3 +67,21 @@ export async function submitRFQ(formData: RFQFormData, cartItems: CartItem[]) {
     return { success: false, error: error.message || 'Terjadi kesalahan tidak terduga.' };
   }
 }
+
+export async function deleteRFQ(rfqId: string) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  try {
+    const { error } = await supabase.from('rfq_requests').delete().eq('id', rfqId);
+    if (error) {
+      console.error("Gagal menghapus RFQ:", error);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err: unknown) {
+    const error = err as Error;
+    console.error("Error deleting RFQ:", error);
+    return { success: false, error: error.message || 'Terjadi kesalahan tidak terduga.' };
+  }
+}

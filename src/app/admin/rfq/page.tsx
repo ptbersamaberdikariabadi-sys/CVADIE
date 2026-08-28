@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import { Eye, MessageCircle } from 'lucide-react';
+import DeleteRFQButton from '@/components/admin/DeleteRFQButton';
 
 export default async function AdminRFQPage() {
   const cookieStore = await cookies();
@@ -90,6 +91,7 @@ export default async function AdminRFQPage() {
                     >
                       <MessageCircle className="w-4 h-4" />
                     </a>
+                    <DeleteRFQButton rfqId={rfq.id} />
                   </td>
                 </tr>
               ))
