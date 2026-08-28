@@ -23,7 +23,7 @@ CREATE POLICY "Public can view todos" ON public.todos
 -- Menyimpan katalog suku cadang B2B
 CREATE TABLE IF NOT EXISTS public.products (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    part_number TEXT UNIQUE NOT NULL,
+    part_number TEXT NOT NULL,
     name TEXT NOT NULL,
     brand TEXT NOT NULL,
     category TEXT NOT NULL,

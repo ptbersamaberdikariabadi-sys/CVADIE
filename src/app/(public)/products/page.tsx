@@ -8,6 +8,8 @@ import { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { generateSlug } from '@/utils/slugify'
+import ProductSearch from '@/components/products/ProductSearch'
+import ProductSidebar from '@/components/products/ProductSidebar'
 
 export const metadata: Metadata = {
   title: "Katalog Produk & Suku Cadang Industri",
@@ -27,7 +29,11 @@ export const metadata: Metadata = {
 
 export const revalidate = 3600 // Regenerate cache every 1 hour (ISR)
 
-export default async function Products() {
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+export default async function Products({ searchParams }: Props) {
   const cookieStore = await cookies()
   const supabase = createClient(cookieStore)
 
@@ -49,11 +55,26 @@ export default async function Products() {
   const { data: brandData } = await supabase.from('products').select('brand');
   const uniqueBrands = Array.from(new Set((brandData || []).map(p => p.brand).filter(Boolean))) as string[];
 
-  const { data: products, error } = await supabase
+  const resolvedParams = await searchParams
+  const q = resolvedParams.q as string | undefined
+  const brands = resolvedParams.brand
+
+  let query = supabase
     .from('products')
     .select('id,name,part_number,brand,category,sub_category,description,image_url,created_at')
     .order('created_at', { ascending: false })
     .limit(48)
+
+  if (q) {
+    query = query.or(`name.ilike.%${q}%,part_number.ilike.%${q}%`)
+  }
+
+  if (brands) {
+    const brandArray = Array.isArray(brands) ? brands : [brands]
+    query = query.in('brand', brandArray)
+  }
+
+  const { data: products, error } = await query
 
   const productList = products || []
 
@@ -98,58 +119,12 @@ export default async function Products() {
       <section className="py-12 flex-1">
         <div className="container mx-auto px-4 flex flex-col md:flex-row gap-8">
           {/* Sidebar Filter */}
-          <aside className="w-full md:w-64 shrink-0">
-            <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm sticky top-28">
-              <div className="flex items-center gap-2 mb-6 text-brand-primary font-bold text-lg border-b pb-4">
-                <Filter className="w-5 h-5" /> Filter Produk
-              </div>
-              
-              <div className="mb-6">
-                <h3 className="font-bold text-gray-900 mb-3">Kategori Spesifik</h3>
-                <ul className="space-y-3 text-sm text-gray-600">
-                  {cmsCategories.length > 0 ? (
-                    cmsCategories.map((cat: string, idx: number) => (
-                      <li key={idx} className="flex items-center gap-2 cursor-pointer hover:text-brand-accent transition-colors">
-                        <Link href={`/products/${generateSlug(cat)}`} className="flex-1 text-gray-600 hover:text-brand-accent transition-colors">
-                          {cat}
-                        </Link>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="text-gray-400 italic">Belum ada kategori</li>
-                  )}
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="font-bold text-gray-900 mb-3">Merek (Brands)</h3>
-                <ul className="space-y-3 text-sm text-gray-600">
-                  {uniqueBrands.length > 0 ? (
-                    uniqueBrands.map((brand, idx) => (
-                      <li key={idx} className="flex items-center gap-2 cursor-pointer hover:text-brand-accent transition-colors">
-                        <input type="checkbox" className="rounded text-brand-primary focus:ring-brand-primary w-4 h-4 cursor-pointer" />
-                        {brand}
-                      </li>
-                    ))
-                  ) : (
-                    <li className="text-gray-400 italic">Belum ada merek</li>
-                  )}
-                </ul>
-              </div>
-            </div>
-          </aside>
+          <ProductSidebar cmsCategories={cmsCategories} uniqueBrands={uniqueBrands} />
 
           {/* Product Grid */}
           <div className="flex-1">
             <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-              <div className="relative w-full max-w-md">
-                <input 
-                  type="text" 
-                  placeholder="Cari part number atau tipe barang..." 
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-md focus:border-brand-primary focus:ring-brand-primary"
-                />
-                <Search className="absolute left-3 top-3.5 w-5 h-5 text-gray-400" />
-              </div>
+              <ProductSearch initialQuery={q || ''} />
               <div className="text-sm text-gray-500 font-medium shrink-0">
                 Menampilkan {productList.length > 0 ? `1-${productList.length}` : '0'} dari {productList.length} Produk
               </div>
