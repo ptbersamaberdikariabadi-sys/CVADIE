@@ -9,7 +9,8 @@ import {
   Settings, 
   LogOut,
   Building2,
-  Menu
+  Menu,
+  Warehouse
 } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
@@ -30,13 +31,53 @@ export default function AdminLayout({
     router.push("/login");
   };
 
+  const [expandedMenus, setExpandedMenus] = useState<Record<string, boolean>>({
+    'Gudang': pathname.startsWith('/admin/warehouse'),
+    'Profil CMS': pathname.startsWith('/admin/cms')
+  });
+
+  const toggleMenu = (name: string) => {
+    setExpandedMenus(prev => ({ ...prev, [name]: !prev[name] }));
+  };
+
   const navItems = [
     { name: "Ikhtisar", href: "/admin", icon: LayoutDashboard },
     { name: "Prospek RFQ", href: "/admin/rfq", icon: Inbox },
     { name: "Katalog Produk", href: "/admin/products", icon: Package },
-    { name: "Profil CMS", href: "/admin/cms", icon: Building2 },
+    { 
+      name: "Gudang", 
+      icon: Warehouse,
+      subItems: [
+        { name: "Pindahkan Lokasi", href: "/admin/warehouse" },
+        { name: "Cari Barang", href: "/admin/warehouse/search" }
+      ]
+    },
+    { 
+      name: "Profil CMS", 
+      icon: Building2,
+      subItems: [
+        { name: "Seksi Hero", href: "/admin/cms/hero_section" },
+        { name: "Seksi Alasan", href: "/admin/cms/why_choose_us" },
+        { name: "Pilar Kepercayaan", href: "/admin/cms/trust_grid" },
+        { name: "Kategori Layanan", href: "/admin/cms/services" },
+        { name: "Seksi Alur Kerja", href: "/admin/cms/workflow" },
+        { name: "Banner CTA Bawah", href: "/admin/cms/cta_banner" },
+        { name: "Halaman Tentang Kami", href: "/admin/cms/about_page" }
+      ]
+    },
     { name: "Pengaturan", href: "/admin/settings", icon: Settings },
   ];
+
+  const getPageTitle = () => {
+    for (const item of navItems) {
+      if (item.href === pathname) return item.name;
+      if (item.subItems) {
+        const sub = item.subItems.find(s => s.href === pathname);
+        if (sub) return sub.name;
+      }
+    }
+    return "Dasbor";
+  };
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -62,12 +103,60 @@ export default function AdminLayout({
 
           <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
             {navItems.map((item) => {
-              const isActive = pathname === item.href;
               const Icon = item.icon;
+              
+              if (item.subItems) {
+                const isExpanded = expandedMenus[item.name];
+                const hasActiveSubItem = item.subItems.some(sub => pathname === sub.href);
+                return (
+                  <div key={item.name} className="space-y-1">
+                    <button
+                      onClick={() => toggleMenu(item.name)}
+                      className={`
+                        w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                        ${hasActiveSubItem && !isExpanded
+                          ? "bg-brand-primary/5 text-brand-primary" 
+                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}
+                      `}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Icon className={`w-5 h-5 ${hasActiveSubItem ? "text-brand-primary" : "text-gray-400"}`} />
+                        {item.name}
+                      </div>
+                      <svg className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {isExpanded && (
+                      <div className="pl-11 pr-3 space-y-1">
+                        {item.subItems.map(sub => {
+                          const isSubActive = pathname === sub.href;
+                          return (
+                            <Link
+                              key={sub.name}
+                              href={sub.href}
+                              className={`
+                                block px-3 py-2 rounded-md text-sm transition-colors
+                                ${isSubActive
+                                  ? "bg-brand-primary/10 text-brand-primary font-medium"
+                                  : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"}
+                              `}
+                            >
+                              {sub.name}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.name}
-                  href={item.href}
+                  href={item.href!}
                   className={`
                     flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                     ${isActive 
@@ -105,7 +194,7 @@ export default function AdminLayout({
               <Menu className="w-6 h-6" />
             </button>
             <h1 className="text-xl font-semibold text-gray-900">
-              {navItems.find(item => item.href === pathname)?.name || "Dasbor"}
+              {getPageTitle()}
             </h1>
           </div>
           <div className="flex items-center gap-3">

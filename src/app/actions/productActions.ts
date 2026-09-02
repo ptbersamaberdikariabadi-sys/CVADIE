@@ -61,3 +61,42 @@ export async function deleteProduct(productId: string) {
     return { success: false, error: error.message || 'Terjadi kesalahan tidak terduga.' };
   }
 }
+
+export async function getProductWithPlacements(productId: string) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  // Fetch product details
+  const { data: product, error: productError } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', productId)
+    .single();
+
+  if (productError) {
+    console.error("Error fetching product:", productError);
+    return null;
+  }
+
+  // Fetch placements
+  const { data: placements, error: placementsError } = await supabase
+    .from('stock_placements')
+    .select(`
+      id, quantity, created_at, updated_at,
+      compartment:compartments(id, name, rack_id, 
+        rack:racks(id, name)
+      )
+    `)
+    .eq('product_id', productId)
+    .order('created_at', { ascending: false });
+
+  if (placementsError) {
+    console.error("Error fetching product placements:", placementsError);
+    // Still return product even if placements fail
+  }
+
+  return {
+    ...product,
+    placements: placements || []
+  };
+}

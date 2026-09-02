@@ -40,6 +40,7 @@ export default async function AdminProductsPage() {
                 <th className="p-4">Produk</th>
                 <th className="p-4">Kategori</th>
                 <th className="p-4">Merek</th>
+                <th className="p-4">Harga Jual</th>
                 <th className="p-4 text-center">Stok</th>
                 <th className="p-4 text-right">Aksi</th>
               </tr>
@@ -82,6 +83,9 @@ export default async function AdminProductsPage() {
                     </td>
                     <td className="p-4 text-sm text-gray-600">
                       {product.brand}
+                    </td>
+                    <td className="p-4 text-sm text-gray-900 font-medium">
+                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(product.selling_price || 0)}
                     </td>
                     <td className="p-4 text-sm text-center">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${

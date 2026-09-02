@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Eye } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -33,6 +33,13 @@ export default function ProductActions({ productId }: { productId: string }) {
 
   return (
     <>
+      <Link 
+        href={`/admin/products/${productId}`}
+        className="p-2 text-gray-400 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 rounded-lg transition-colors inline-flex items-center" 
+        title="Detail Produk"
+      >
+        <Eye className="w-4 h-4" />
+      </Link>
       <Link 
         href={`/admin/products/${productId}/edit`}
         className="p-2 text-gray-400 hover:text-brand-primary bg-gray-50 hover:bg-brand-primary/10 rounded-lg transition-colors inline-flex items-center" 

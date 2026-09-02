@@ -30,6 +30,8 @@ export default function ProductForm({ initialData, cmsCategories = [] }: Product
     sub_category: initialData?.sub_category || '',
     description: initialData?.description || '',
     stock: initialData?.stock || 0,
+    base_price: initialData?.base_price || 0,
+    selling_price: initialData?.selling_price || 0,
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -121,10 +123,18 @@ export default function ProductForm({ initialData, cmsCategories = [] }: Product
           .join(' ');
       }
 
+      if (Number(formData.selling_price) < Number(formData.base_price)) {
+        setError('Harga Jual tidak boleh lebih kecil dari Harga Dasar (Modal).');
+        setIsSubmitting(false);
+        return;
+      }
+
       const payload = {
         ...formData,
         sub_category: normalizedSubCategory,
         stock: parseInt(formData.stock.toString()) || 0,
+        base_price: parseFloat(formData.base_price.toString()) || 0,
+        selling_price: parseFloat(formData.selling_price.toString()) || 0,
         image_url: imageUrl,
         pdf_datasheet_url: pdfUrl,
       };
@@ -212,6 +222,29 @@ export default function ProductForm({ initialData, cmsCategories = [] }: Product
               type="number" 
               name="stock" 
               value={formData.stock}
+              onChange={handleInputChange}
+              min="0"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Harga Dasar (Modal) Rp</label>
+            <input 
+              type="number" 
+              name="base_price" 
+              value={formData.base_price}
+              onChange={handleInputChange}
+              min="0"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none"
+            />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Harga Jual Rp *</label>
+            <input 
+              type="number" 
+              name="selling_price" 
+              required
+              value={formData.selling_price}
               onChange={handleInputChange}
               min="0"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none"
