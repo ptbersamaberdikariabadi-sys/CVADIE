@@ -53,6 +53,15 @@ export const metadata: Metadata = {
     description: "Mitra Terpercaya Pengadaan Komponen Industri Skala Besar.",
     images: ["https://www.abadidewana.com/logo.jpeg"],
   },
+  icons: {
+    icon: [
+      { url: '/logo.jpeg', type: 'image/jpeg' },
+    ],
+    shortcut: ['/logo.jpeg'],
+    apple: [
+      { url: '/logo.jpeg', sizes: '180x180', type: 'image/jpeg' },
+    ],
+  },
 };
 
 export default function RootLayout({
