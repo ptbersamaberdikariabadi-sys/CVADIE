@@ -1,14 +1,19 @@
-import { getRacks } from '@/app/actions/warehouseActions';
+import { getRacks, getUnallocatedStock, getAllCompartments } from '@/app/actions/warehouseActions';
 import Link from 'next/link';
 import { Plus, Warehouse, Edit } from 'lucide-react';
 import DeleteRackButton from '@/components/admin/warehouse/DeleteRackButton';
+import UnallocatedWarningTable from '@/components/admin/warehouse/UnallocatedWarningTable';
 
 export const metadata = {
   title: 'Manajemen Rak Gudang - ADIE ERP',
 };
 
 export default async function WarehousePage() {
-  const racks = await getRacks();
+  const [racks, unallocatedStock, compartments] = await Promise.all([
+    getRacks(),
+    getUnallocatedStock(),
+    getAllCompartments()
+  ]);
 
   return (
     <div className="space-y-6">
@@ -25,6 +30,11 @@ export default async function WarehousePage() {
           Tambah Rak
         </Link>
       </div>
+
+      <UnallocatedWarningTable 
+        unallocatedStock={unallocatedStock} 
+        compartments={compartments} 
+      />
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         {racks.length === 0 ? (

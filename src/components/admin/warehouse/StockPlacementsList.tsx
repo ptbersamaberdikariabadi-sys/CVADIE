@@ -68,14 +68,23 @@ export default function StockPlacementsList({ compartmentId, rackId }: { compart
     setIsSubmitting(false);
   };
 
-  const handleRemoveStock = async (placementId: string) => {
-    if (confirm("Keluarkan produk ini dari kompartemen?")) {
-      const res = await removeStockFromCompartment(placementId, rackId);
+  const handleRemoveStock = async (placementId: string, maxQuantity: number) => {
+    const qtyStr = window.prompt(`Keluarkan produk ini dari kompartemen?\n\nBerapa unit yang ingin dikeluarkan? (Maksimal: ${maxQuantity})`, maxQuantity.toString());
+    
+    if (qtyStr !== null) {
+      const qty = parseInt(qtyStr);
+      if (isNaN(qty) || qty <= 0 || qty > maxQuantity) {
+        alert(`Kuantitas tidak valid. Harap masukkan angka antara 1 dan ${maxQuantity}.`);
+        return;
+      }
+      setIsSubmitting(true);
+      const res = await removeStockFromCompartment(placementId, rackId, qty);
       if (res.success) {
         await loadData();
       } else {
-        alert(res.error || "Gagal menghapus stok dari kompartemen");
+        alert(res.error || "Gagal mengeluarkan stok dari kompartemen");
       }
+      setIsSubmitting(false);
     }
   };
 
@@ -114,9 +123,10 @@ export default function StockPlacementsList({ compartmentId, rackId }: { compart
                   <Eye className="w-4 h-4" />
                 </Link>
                 <button 
-                  onClick={() => handleRemoveStock(p.id)}
+                  onClick={() => handleRemoveStock(p.id, p.quantity)}
                   className="p-1.5 text-red-500 hover:bg-red-50 rounded"
                   title="Keluarkan Barang"
+                  disabled={isSubmitting}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>

@@ -156,6 +156,76 @@ export async function getCompartmentsByRackId(rackId: string) {
   return data as Compartment[];
 }
 
+export async function getAllCompartments() {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data, error } = await supabase
+    .from('compartments')
+    .select('id, name, rack:racks(name)')
+    .order('name', { ascending: true });
+
+  if (error) {
+    console.error("Error fetching compartments:", error);
+    return [];
+  }
+
+  return data;
+}
+
+export async function getAllStockPlacements() {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data, error } = await supabase
+    .from('stock_placements')
+    .select('id, product_id, compartment_id, quantity')
+    .gt('quantity', 0);
+
+  if (error) {
+    console.error("Error fetching placements:", error);
+    return [];
+  }
+
+  return data;
+}
+
+export async function getUnallocatedStock() {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const [productsRes, placementsRes] = await Promise.all([
+    supabase.from('products').select('id, name, part_number, stock'),
+    supabase.from('stock_placements').select('product_id, quantity')
+  ]);
+
+  if (productsRes.error || placementsRes.error) {
+    console.error("Error fetching for unallocated stock");
+    return [];
+  }
+
+  const placements = placementsRes.data || [];
+  const products = productsRes.data || [];
+
+  const unallocated = [];
+
+  for (const p of products) {
+    const totalInRacks = placements
+      .filter(pl => pl.product_id === p.id)
+      .reduce((sum, pl) => sum + pl.quantity, 0);
+    
+    if ((p.stock || 0) > totalInRacks) {
+      unallocated.push({
+        ...p,
+        allocated: totalInRacks,
+        unallocated: (p.stock || 0) - totalInRacks
+      });
+    }
+  }
+
+  return unallocated;
+}
+
 export async function createCompartment(rackId: string, formData: FormData) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
@@ -279,22 +349,132 @@ export async function addStockToCompartment(compartmentId: string, productId: st
     return { success: false, error: error.message };
   }
 
+  // Log movement
+  await supabase.from('stock_movements').insert([{
+    product_id: productId,
+    compartment_id: compartmentId,
+    type: 'IN',
+    quantity: quantity,
+    reference_note: 'Goods-In (Added via Web UI)'
+  }]);
+
+  // Update main catalog stock
+  const { data: product } = await supabase.from('products').select('stock').eq('id', productId).single();
+  if (product) {
+    await supabase.from('products').update({ stock: (product.stock || 0) + quantity }).eq('id', productId);
+  }
+
   revalidatePath(`/admin/warehouse/racks/${rackId}`);
   return { success: true };
 }
 
-export async function removeStockFromCompartment(placementId: string, rackId: string) {
+export async function allocateUnallocatedStock(productId: string, compartmentId: string, quantity: number) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  const { error } = await supabase
+  if (!productId || !compartmentId || quantity <= 0) {
+    return { success: false, error: 'Produk, kompartemen, dan kuantitas wajib diisi' };
+  }
+
+  // Check if placement already exists
+  const { data: existing } = await supabase
     .from('stock_placements')
-    .delete()
-    .eq('id', placementId);
+    .select('id, quantity')
+    .eq('compartment_id', compartmentId)
+    .eq('product_id', productId)
+    .single();
+
+  let error;
+  if (existing) {
+    // Update existing quantity
+    const { error: updateError } = await supabase
+      .from('stock_placements')
+      .update({ quantity: existing.quantity + quantity })
+      .eq('id', existing.id);
+    error = updateError;
+  } else {
+    // Insert new placement
+    const { error: insertError } = await supabase
+      .from('stock_placements')
+      .insert([{ compartment_id: compartmentId, product_id: productId, quantity }]);
+    error = insertError;
+  }
+
+  if (error) {
+    console.error("Error allocating stock:", error);
+    return { success: false, error: error.message };
+  }
+
+  // Log movement
+  await supabase.from('stock_movements').insert([{
+    product_id: productId,
+    compartment_id: compartmentId,
+    type: 'IN', // Still an IN movement for the compartment
+    quantity: quantity,
+    reference_note: 'Allocation (from floating stock)'
+  }]);
+
+  // Notice: We deliberately do NOT update the main products.stock here,
+  // because the stock is already in the catalog (it was just floating).
+
+  revalidatePath(`/admin/warehouse`);
+  return { success: true };
+}
+
+export async function removeStockFromCompartment(placementId: string, rackId: string, quantityToRemove?: number) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  // Fetch placement first to know product_id, compartment_id, and current quantity
+  const { data: placement, error: fetchError } = await supabase
+    .from('stock_placements')
+    .select('*')
+    .eq('id', placementId)
+    .single();
+
+  if (fetchError || !placement) {
+    console.error("Error fetching placement:", fetchError);
+    return { success: false, error: 'Data penempatan tidak ditemukan' };
+  }
+
+  let error;
+  let finalQtyToRemove = quantityToRemove ?? placement.quantity;
+
+  if (quantityToRemove && quantityToRemove > 0 && quantityToRemove < placement.quantity) {
+    // Partial removal
+    const { error: updateError } = await supabase
+      .from('stock_placements')
+      .update({ quantity: placement.quantity - quantityToRemove })
+      .eq('id', placementId);
+    error = updateError;
+  } else {
+    // Full removal
+    finalQtyToRemove = placement.quantity; // We are removing all of it
+    const { error: deleteError } = await supabase
+      .from('stock_placements')
+      .delete()
+      .eq('id', placementId);
+    error = deleteError;
+  }
 
   if (error) {
     console.error("Error removing stock placement:", error);
     return { success: false, error: error.message };
+  }
+
+  // Log movement
+  await supabase.from('stock_movements').insert([{
+    product_id: placement.product_id,
+    compartment_id: placement.compartment_id,
+    type: 'OUT',
+    quantity: finalQtyToRemove,
+    reference_note: 'Goods-Out (Removed via Web UI)'
+  }]);
+
+  // Update main catalog stock
+  const { data: product } = await supabase.from('products').select('stock').eq('id', placement.product_id).single();
+  if (product) {
+    await supabase.from('products').update({ stock: Math.max(0, (product.stock || 0) - finalQtyToRemove) }).eq('id', placement.product_id);
   }
 
   revalidatePath(`/admin/warehouse/racks/${rackId}`);
@@ -316,6 +496,52 @@ export async function getAllProductsForDropdown() {
   }
   return data;
 }
+
+// --- STOCK MOVEMENTS ---
+export type StockMovement = {
+  id: string;
+  product_id: string;
+  compartment_id: string | null;
+  type: 'IN' | 'OUT';
+  quantity: number;
+  reference_note: string | null;
+  created_at: string;
+  product?: {
+    id: string;
+    name: string;
+    part_number: string;
+  } | null;
+  compartment?: {
+    id: string;
+    name: string;
+    rack?: {
+      name: string;
+    } | null;
+  } | null;
+};
+
+export async function getStockMovements() {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data, error } = await supabase
+    .from('stock_movements')
+    .select(`
+      *,
+      product:products(id, name, part_number),
+      compartment:compartments(id, name, rack:racks(name))
+    `)
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (error) {
+    console.error("Error fetching stock movements:", error);
+    return [];
+  }
+  
+  return data as StockMovement[];
+}
+
 
 export async function searchWarehouseItems(query: string, rackIdFilter?: string) {
   const cookieStore = await cookies();

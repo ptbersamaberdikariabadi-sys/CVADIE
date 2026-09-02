@@ -10,7 +10,8 @@ import {
   LogOut,
   Building2,
   Menu,
-  Warehouse
+  Warehouse,
+  Truck
 } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
@@ -49,8 +50,14 @@ export default function AdminLayout({
       icon: Warehouse,
       subItems: [
         { name: "Pindahkan Lokasi", href: "/admin/warehouse" },
-        { name: "Cari Barang", href: "/admin/warehouse/search" }
+        { name: "Cari Barang", href: "/admin/warehouse/search" },
+        { name: "Riwayat Transaksi", href: "/admin/warehouse/history" }
       ]
+    },
+    { 
+      name: "Logistik / Surat Jalan", 
+      href: "/admin/shipments",
+      icon: Truck
     },
     { 
       name: "Profil CMS", 
