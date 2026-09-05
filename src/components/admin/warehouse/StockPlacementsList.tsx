@@ -1,21 +1,29 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Package, Trash2, Plus, Loader2, Eye } from 'lucide-react';
+import { Package, Trash2, Plus, Loader2, Eye, MoveRight, X } from 'lucide-react';
 import Link from 'next/link';
 import { 
   getPlacementsByCompartment, 
   getAllProductsForDropdown, 
   addStockToCompartment, 
   removeStockFromCompartment,
+  moveStockPlacement,
+  getAllCompartments,
   StockPlacement
 } from '@/app/actions/warehouseActions';
 
 export default function StockPlacementsList({ compartmentId, rackId }: { compartmentId: string, rackId: string }) {
   const [placements, setPlacements] = useState<StockPlacement[]>([]);
   const [products, setProducts] = useState<{ id: string; name: string; part_number: string; stock: number }[]>([]);
+  const [allCompartments, setAllCompartments] = useState<{ id: string; name: string; rack: any }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Move state
+  const [movingPlacementId, setMovingPlacementId] = useState<string | null>(null);
+  const [moveDestCompartmentId, setMoveDestCompartmentId] = useState('');
+  const [moveQuantity, setMoveQuantity] = useState('1');
   
   // Form state
   const [selectedProductId, setSelectedProductId] = useState('');
@@ -30,12 +38,14 @@ export default function StockPlacementsList({ compartmentId, rackId }: { compart
 
   const loadData = async () => {
     try {
-      const [placementsData, productsData] = await Promise.all([
+      const [placementsData, productsData, compartmentsData] = await Promise.all([
         getPlacementsByCompartment(compartmentId),
-        getAllProductsForDropdown()
+        getAllProductsForDropdown(),
+        getAllCompartments()
       ]);
       setPlacements(placementsData || []);
       setProducts(productsData || []);
+      setAllCompartments(compartmentsData || []);
     } catch (error) {
       console.error(error);
     } finally {
@@ -88,6 +98,25 @@ export default function StockPlacementsList({ compartmentId, rackId }: { compart
     }
   };
 
+  const handleMoveSubmit = async (placementId: string, maxQty: number) => {
+    if (!moveDestCompartmentId) return alert("Pilih kompartemen tujuan");
+    const qty = parseInt(moveQuantity);
+    if (isNaN(qty) || qty <= 0 || qty > maxQty) return alert("Kuantitas tidak valid");
+    if (moveDestCompartmentId === compartmentId) return alert("Tujuan tidak boleh sama dengan asal");
+
+    setIsSubmitting(true);
+    const res = await moveStockPlacement(placementId, moveDestCompartmentId, qty, rackId);
+    if (res.success) {
+      setMovingPlacementId(null);
+      setMoveDestCompartmentId('');
+      setMoveQuantity('1');
+      await loadData();
+    } else {
+      alert(res.error || "Gagal memindahkan barang");
+    }
+    setIsSubmitting(false);
+  };
+
   if (isLoading) {
     return (
       <div className="p-4 flex items-center justify-center text-gray-500">
@@ -108,29 +137,87 @@ export default function StockPlacementsList({ compartmentId, rackId }: { compart
       ) : (
         <div className="space-y-2 mb-4">
           {placements.map((p) => (
-            <div key={p.id} className="flex items-center justify-between bg-white p-2.5 rounded border border-gray-100 shadow-sm">
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-gray-900">{p.product?.name || 'Produk Tidak Ditemukan'}</span>
-                <span className="text-xs text-gray-500">SKU: {p.product?.part_number || '-'}</span>
+            <div key={p.id} className="flex flex-col gap-2 bg-white p-2.5 rounded border border-gray-100 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-gray-900">{p.product?.name || 'Produk Tidak Ditemukan'}</span>
+                  <span className="text-xs text-gray-500">SKU: {p.product?.part_number || '-'}</span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-bold text-brand-primary">{p.quantity} Unit</span>
+                  <Link
+                    href={`/admin/products/${p.product_id}`}
+                    className="p-1.5 text-brand-primary hover:bg-blue-50 rounded"
+                    title="Detail Produk"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Link>
+                  <button 
+                    onClick={() => {
+                      setMovingPlacementId(movingPlacementId === p.id ? null : p.id);
+                      setMoveQuantity('1');
+                      setMoveDestCompartmentId('');
+                    }}
+                    className={`p-1.5 rounded transition-colors ${movingPlacementId === p.id ? 'bg-orange-100 text-orange-600' : 'text-orange-500 hover:bg-orange-50'}`}
+                    title="Pindah Lokasi"
+                    disabled={isSubmitting}
+                  >
+                    <MoveRight className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => handleRemoveStock(p.id, p.quantity)}
+                    className="p-1.5 text-red-500 hover:bg-red-50 rounded"
+                    title="Keluarkan Barang (Hanya jadi Unallocated)"
+                    disabled={isSubmitting}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-bold text-brand-primary">{p.quantity} Unit</span>
-                <Link
-                  href={`/admin/products/${p.product_id}`}
-                  className="p-1.5 text-brand-primary hover:bg-blue-50 rounded"
-                  title="Detail Produk"
-                >
-                  <Eye className="w-4 h-4" />
-                </Link>
-                <button 
-                  onClick={() => handleRemoveStock(p.id, p.quantity)}
-                  className="p-1.5 text-red-500 hover:bg-red-50 rounded"
-                  title="Keluarkan Barang"
-                  disabled={isSubmitting}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+              
+              {/* Move Form Inline */}
+              {movingPlacementId === p.id && (
+                <div className="mt-2 p-3 bg-orange-50/50 border border-orange-100 rounded-lg flex gap-2 items-center">
+                  <div className="flex-1">
+                    <select
+                      value={moveDestCompartmentId}
+                      onChange={(e) => setMoveDestCompartmentId(e.target.value)}
+                      className="w-full text-sm border-gray-300 rounded focus:ring-orange-500 focus:border-orange-500"
+                    >
+                      <option value="">Pilih Tujuan...</option>
+                      {allCompartments.filter(c => c.id !== compartmentId).map(c => (
+                        <option key={c.id} value={c.id}>
+                          {c.rack?.name} - {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="w-20">
+                    <input
+                      type="number"
+                      min="1"
+                      max={p.quantity}
+                      value={moveQuantity}
+                      onChange={(e) => setMoveQuantity(e.target.value)}
+                      className="w-full text-sm border-gray-300 rounded focus:ring-orange-500 focus:border-orange-500"
+                    />
+                  </div>
+                  <button
+                    onClick={() => handleMoveSubmit(p.id, p.quantity)}
+                    disabled={isSubmitting || !moveDestCompartmentId}
+                    className="px-3 py-1.5 bg-orange-500 text-white text-sm font-medium rounded hover:bg-orange-600 disabled:opacity-50"
+                  >
+                    Pindah
+                  </button>
+                  <button
+                    onClick={() => setMovingPlacementId(null)}
+                    disabled={isSubmitting}
+                    className="p-1.5 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>

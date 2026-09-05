@@ -51,7 +51,7 @@ export default function AdminLayout({
       subItems: [
         { name: "Pindahkan Lokasi", href: "/admin/warehouse" },
         { name: "Cari Barang", href: "/admin/warehouse/search" },
-        { name: "Riwayat Transaksi", href: "/admin/warehouse/history" }
+        { name: "Histori Perpindahan", href: "/admin/warehouse/history" }
       ]
     },
     { 

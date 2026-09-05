@@ -57,9 +57,9 @@ export default function TransactionHistoryPage() {
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Riwayat Transaksi Stok</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Histori Perpindahan Part</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Catatan mutasi barang masuk (Goods-In) dan barang keluar (Goods-Out) dari rak gudang.
+            Catatan mutasi internal barang antar rak gudang atau penyesuaian kuantitas.
           </p>
         </div>
         <button

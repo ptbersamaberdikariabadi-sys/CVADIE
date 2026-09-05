@@ -472,10 +472,75 @@ export async function removeStockFromCompartment(placementId: string, rackId: st
   }]);
 
   // Update main catalog stock
-  const { data: product } = await supabase.from('products').select('stock').eq('id', placement.product_id).single();
-  if (product) {
-    await supabase.from('products').update({ stock: Math.max(0, (product.stock || 0) - finalQtyToRemove) }).eq('id', placement.product_id);
+  // Notice: We deliberately do NOT update the main products.stock here,
+  // because the stock is just unallocated (returned to floating).
+
+  revalidatePath(`/admin/warehouse/racks/${rackId}`);
+  return { success: true };
+}
+
+export async function moveStockPlacement(placementId: string, destinationCompartmentId: string, quantityToMove: number, rackId: string) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  // 1. Fetch source placement
+  const { data: placement, error: fetchError } = await supabase
+    .from('stock_placements')
+    .select('*')
+    .eq('id', placementId)
+    .single();
+
+  if (fetchError || !placement) {
+    console.error("Error fetching placement:", fetchError);
+    return { success: false, error: 'Data asal tidak ditemukan' };
   }
+
+  if (quantityToMove <= 0 || quantityToMove > placement.quantity) {
+    return { success: false, error: 'Kuantitas pindah tidak valid' };
+  }
+
+  // 2. Reduce or remove source placement
+  if (quantityToMove < placement.quantity) {
+    await supabase.from('stock_placements').update({ quantity: placement.quantity - quantityToMove }).eq('id', placementId);
+  } else {
+    await supabase.from('stock_placements').delete().eq('id', placementId);
+  }
+
+  // 3. Add to destination compartment
+  const { data: existingDest } = await supabase
+    .from('stock_placements')
+    .select('id, quantity')
+    .eq('compartment_id', destinationCompartmentId)
+    .eq('product_id', placement.product_id)
+    .single();
+
+  if (existingDest) {
+    await supabase.from('stock_placements').update({ quantity: existingDest.quantity + quantityToMove }).eq('id', existingDest.id);
+  } else {
+    await supabase.from('stock_placements').insert([{
+      compartment_id: destinationCompartmentId,
+      product_id: placement.product_id,
+      quantity: quantityToMove
+    }]);
+  }
+
+  // 4. Log the internal move in stock_movements (one OUT from source, one IN to dest)
+  await supabase.from('stock_movements').insert([
+    {
+      product_id: placement.product_id,
+      compartment_id: placement.compartment_id,
+      type: 'OUT',
+      quantity: quantityToMove,
+      reference_note: 'Dipindahkan (Internal)'
+    },
+    {
+      product_id: placement.product_id,
+      compartment_id: destinationCompartmentId,
+      type: 'IN',
+      quantity: quantityToMove,
+      reference_note: 'Diterima dari pindah internal'
+    }
+  ]);
 
   revalidatePath(`/admin/warehouse/racks/${rackId}`);
   return { success: true };
@@ -536,6 +601,7 @@ export async function getStockMovements() {
       product:products(id, name, part_number),
       compartment:compartments(id, name, rack:racks(name))
     `)
+    .is('transaction_category', null)
     .order('created_at', { ascending: false })
     .limit(100);
 

@@ -114,11 +114,12 @@ export async function getTransactions() {
       product:products(id, name, part_number),
       compartment:compartments(id, name, rack:racks(name))
     `)
+    .not('transaction_category', 'is', null)
     .order('created_at', { ascending: false })
     .limit(200);
 
   if (error) {
-    console.error("Error fetching transactions:", error);
+    console.error("Error fetching transactions:", JSON.stringify(error, null, 2), error);
     return [];
   }
   
