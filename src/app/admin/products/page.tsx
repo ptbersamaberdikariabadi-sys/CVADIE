@@ -4,16 +4,30 @@ import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import ProductActions from '@/components/admin/ProductActions';
 import Image from 'next/image';
+import ProductSearch from '@/components/admin/ProductSearch';
 
-export default async function AdminProductsPage() {
+export default async function AdminProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ query?: string }>;
+}) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  const { data: products } = await supabase
+  const resolvedParams = await searchParams;
+  const query = resolvedParams.query;
+
+  let dbQuery = supabase
     .from('products')
     .select('*')
     .order('created_at', { ascending: false })
     .limit(100);
+
+  if (query) {
+    dbQuery = dbQuery.or(`name.ilike.%${query}%,part_number.ilike.%${query}%`);
+  }
+
+  const { data: products } = await dbQuery;
 
   return (
     <div className="space-y-6">
@@ -24,11 +38,15 @@ export default async function AdminProductsPage() {
         </div>
         <Link 
           href="/admin/products/new"
-          className="bg-brand-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+          className="bg-brand-primary hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shrink-0"
         >
           <Plus className="w-4 h-4" />
           Tambah Produk
         </Link>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <ProductSearch />
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -40,7 +58,6 @@ export default async function AdminProductsPage() {
                 <th className="p-4">Produk</th>
                 <th className="p-4">Kategori</th>
                 <th className="p-4">Merek</th>
-                <th className="p-4">Harga Jual</th>
                 <th className="p-4 text-center">Stok</th>
                 <th className="p-4 text-right">Aksi</th>
               </tr>
@@ -83,9 +100,6 @@ export default async function AdminProductsPage() {
                     </td>
                     <td className="p-4 text-sm text-gray-600">
                       {product.brand}
-                    </td>
-                    <td className="p-4 text-sm text-gray-900 font-medium">
-                      {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(product.selling_price || 0)}
                     </td>
                     <td className="p-4 text-sm text-center">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${

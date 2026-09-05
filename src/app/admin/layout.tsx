@@ -11,7 +11,7 @@ import {
   Building2,
   Menu,
   Warehouse,
-  Truck
+  ArrowRightLeft
 } from "lucide-react";
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
@@ -55,9 +55,9 @@ export default function AdminLayout({
       ]
     },
     { 
-      name: "Logistik / Surat Jalan", 
-      href: "/admin/shipments",
-      icon: Truck
+      name: "Keluar/Masuk Part", 
+      href: "/admin/transactions",
+      icon: ArrowRightLeft
     },
     { 
       name: "Profil CMS", 

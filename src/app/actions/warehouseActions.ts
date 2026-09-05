@@ -505,6 +505,11 @@ export type StockMovement = {
   type: 'IN' | 'OUT';
   quantity: number;
   reference_note: string | null;
+  transaction_category?: string;
+  sender?: string;
+  receiver?: string;
+  price?: number;
+  transaction_date?: string;
   created_at: string;
   product?: {
     id: string;
