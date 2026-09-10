@@ -16,7 +16,8 @@ import {
 export default function StockPlacementsList({ compartmentId, rackId }: { compartmentId: string, rackId: string }) {
   const [placements, setPlacements] = useState<StockPlacement[]>([]);
   const [products, setProducts] = useState<{ id: string; name: string; part_number: string; stock: number }[]>([]);
-  const [allCompartments, setAllCompartments] = useState<{ id: string; name: string; rack: { id: string; name: string } }[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [allCompartments, setAllCompartments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
