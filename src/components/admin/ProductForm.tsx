@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { Save, Loader2, UploadCloud, FileText } from 'lucide-react';
 
@@ -18,6 +18,8 @@ type ProductFormProps = {
 
 export default function ProductForm({ initialData, cmsCategories = [] }: ProductFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get('returnTo');
   const supabase = createClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -154,7 +156,8 @@ export default function ProductForm({ initialData, cmsCategories = [] }: Product
         if (insertError) throw insertError;
       }
 
-      router.push('/admin/products');
+      const destination = returnTo ? decodeURIComponent(returnTo) : '/admin/products';
+      router.push(destination);
       router.refresh(); // Refresh server component data
     } catch (err: unknown) {
       const error = err as Error;
@@ -348,7 +351,10 @@ export default function ProductForm({ initialData, cmsCategories = [] }: Product
       <div className="p-6 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
         <button 
           type="button" 
-          onClick={() => router.back()}
+          onClick={() => {
+            const destination = returnTo ? decodeURIComponent(returnTo) : '/admin/products';
+            router.push(destination);
+          }}
           className="px-6 py-2.5 rounded-lg text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
         >
           Batal

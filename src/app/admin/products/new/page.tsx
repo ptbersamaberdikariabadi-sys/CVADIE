@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
+import { Suspense } from "react";
 
 export default async function NewProductPage() {
   const cookieStore = await cookies();
@@ -27,7 +28,9 @@ export default async function NewProductPage() {
         </div>
       </div>
       
-      <ProductForm cmsCategories={cmsCategories} />
+      <Suspense fallback={<div className="p-4 text-center text-gray-500">Memuat formulir...</div>}>
+        <ProductForm cmsCategories={cmsCategories} />
+      </Suspense>
     </div>
   );
 }

@@ -165,9 +165,18 @@ export default function NewTransactionPage() {
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-gray-700">Nama Part</label>
             <SearchableSelect
-              options={products.map(p => ({ value: p.id, label: `${p.part_number} - ${p.name} (Stok: ${p.stock})` }))}
+              options={[
+                { value: 'NEW_PART', label: '+ Part Baru Di system' },
+                ...products.map(p => ({ value: p.id, label: `${p.part_number} - ${p.name} (Stok: ${p.stock})` }))
+              ]}
               value={productId}
-              onChange={setProductId}
+              onChange={(val) => {
+                if (val === 'NEW_PART') {
+                  router.push(`/admin/products/new?returnTo=${encodeURIComponent('/admin/transactions/new')}`);
+                } else {
+                  setProductId(val);
+                }
+              }}
               placeholder="-- Cari Produk --"
               required
             />

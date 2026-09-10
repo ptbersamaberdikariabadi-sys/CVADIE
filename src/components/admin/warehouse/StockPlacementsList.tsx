@@ -16,7 +16,7 @@ import {
 export default function StockPlacementsList({ compartmentId, rackId }: { compartmentId: string, rackId: string }) {
   const [placements, setPlacements] = useState<StockPlacement[]>([]);
   const [products, setProducts] = useState<{ id: string; name: string; part_number: string; stock: number }[]>([]);
-  const [allCompartments, setAllCompartments] = useState<{ id: string; name: string; rack: any }[]>([]);
+  const [allCompartments, setAllCompartments] = useState<{ id: string; name: string; rack: { id: string; name: string } }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
