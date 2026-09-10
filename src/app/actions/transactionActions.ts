@@ -26,6 +26,9 @@ export async function createPartTransaction(data: {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
+
   // 1. Check current stock if OUTBOUND
   if (data.type === 'OUT') {
     const { data: placement } = await supabase

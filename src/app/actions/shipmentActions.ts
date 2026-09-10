@@ -30,6 +30,9 @@ export async function createShipment(data: {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
+
   if (!data.partner_name || data.items.length === 0) {
     return { success: false, error: 'Nama partner dan minimal 1 item wajib diisi' };
   }

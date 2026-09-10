@@ -80,6 +80,9 @@ export async function createRack(formData: FormData) {
   const name = formData.get('name') as string;
   const description = formData.get('description') as string;
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
+
   if (!name) return { success: false, error: 'Nama rak wajib diisi' };
 
   const { error } = await supabase
@@ -102,6 +105,9 @@ export async function updateRack(id: string, formData: FormData) {
   const name = formData.get('name') as string;
   const description = formData.get('description') as string;
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
+
   if (!name) return { success: false, error: 'Nama rak wajib diisi' };
 
   const { error } = await supabase
@@ -121,6 +127,9 @@ export async function updateRack(id: string, formData: FormData) {
 export async function deleteRack(id: string) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
 
   const { error } = await supabase
     .from('racks')
@@ -234,6 +243,9 @@ export async function createCompartment(rackId: string, formData: FormData) {
   const max_capacity_str = formData.get('max_capacity') as string;
   const max_capacity = max_capacity_str ? parseInt(max_capacity_str) : null;
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
+
   if (!name) return { success: false, error: 'Nama kompartemen wajib diisi' };
 
   const { error } = await supabase
@@ -257,6 +269,9 @@ export async function updateCompartment(id: string, rackId: string, formData: Fo
   const max_capacity_str = formData.get('max_capacity') as string;
   const max_capacity = max_capacity_str ? parseInt(max_capacity_str) : null;
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
+
   if (!name) return { success: false, error: 'Nama kompartemen wajib diisi' };
 
   const { error } = await supabase
@@ -276,6 +291,9 @@ export async function updateCompartment(id: string, rackId: string, formData: Fo
 export async function deleteCompartment(id: string, rackId: string) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
 
   const { error } = await supabase
     .from('compartments')
@@ -317,6 +335,9 @@ export async function getPlacementsByCompartment(compartmentId: string) {
 export async function addStockToCompartment(compartmentId: string, productId: string, quantity: number, rackId: string) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
 
   if (!productId || quantity <= 0) return { success: false, error: 'Produk dan kuantitas (minimal 1) wajib diisi' };
 
@@ -372,6 +393,9 @@ export async function allocateUnallocatedStock(productId: string, compartmentId:
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
+
   if (!productId || !compartmentId || quantity <= 0) {
     return { success: false, error: 'Produk, kompartemen, dan kuantitas wajib diisi' };
   }
@@ -424,6 +448,9 @@ export async function allocateUnallocatedStock(productId: string, compartmentId:
 export async function removeStockFromCompartment(placementId: string, rackId: string, quantityToRemove?: number) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
 
   // Fetch placement first to know product_id, compartment_id, and current quantity
   const { data: placement, error: fetchError } = await supabase
@@ -482,6 +509,9 @@ export async function removeStockFromCompartment(placementId: string, rackId: st
 export async function moveStockPlacement(placementId: string, destinationCompartmentId: string, quantityToMove: number, rackId: string) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
 
   // 1. Fetch source placement
   const { data: placement, error: fetchError } = await supabase

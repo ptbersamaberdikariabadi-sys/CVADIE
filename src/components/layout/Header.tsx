@@ -64,7 +64,7 @@ export default function Header() {
               alt="Logo CV. ADIE"
               width={160}
               height={48}
-              className="object-contain h-12 w-auto"
+              className="object-contain"
               priority
             />
           </Link>
@@ -142,7 +142,7 @@ export default function Header() {
       >
         {/* Drawer Header */}
         <div className="flex items-center justify-between px-5 py-5 border-b bg-brand-primary">
-          <Image src="/logo.jpeg" alt="Logo CV. ADIE" width={120} height={36} className="h-9 w-auto object-contain brightness-200" />
+          <Image src="/logo.jpeg" alt="Logo CV. ADIE" width={120} height={36} className="object-contain brightness-200" />
           <button
             onClick={() => setMobileOpen(false)}
             className="p-1 text-white/80 hover:text-white"
