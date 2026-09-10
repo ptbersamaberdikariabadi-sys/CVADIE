@@ -3,6 +3,7 @@ import { Plus, ArrowDownRight, ArrowUpRight, Calendar, Package } from "lucide-re
 import Link from "next/link";
 import ExportTransactionsButton from "@/components/admin/ExportTransactionsButton";
 import { StockMovement } from "@/app/actions/warehouseActions";
+import TransactionActions from "@/components/admin/transactions/TransactionActions";
 
 export default async function TransactionsPage() {
   const transactions = await getTransactions() as StockMovement[];
@@ -40,12 +41,13 @@ export default async function TransactionsPage() {
                 <th className="px-6 py-4 font-medium">Qty</th>
                 <th className="px-6 py-4 font-medium">Kompartemen</th>
                 <th className="px-6 py-4 font-medium">Keterangan</th>
+                <th className="px-4 py-4 font-medium">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {transactions.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan={8} className="px-6 py-12 text-center text-gray-500">
                     Belum ada transaksi
                   </td>
                 </tr>
@@ -98,6 +100,9 @@ export default async function TransactionsPage() {
                     <td className="px-6 py-4 text-gray-500 max-w-[200px] truncate">
                       {tx.price && <div className="font-medium text-gray-900">Rp {tx.price.toLocaleString('id-ID')}</div>}
                       {tx.reference_note}
+                    </td>
+                    <td className="px-4 py-4">
+                      <TransactionActions transaction={tx as Parameters<typeof TransactionActions>[0]['transaction']} />
                     </td>
                   </tr>
                 ))
