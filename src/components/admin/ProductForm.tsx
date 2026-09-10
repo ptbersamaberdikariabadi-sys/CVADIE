@@ -10,11 +10,26 @@ const MAX_PDF_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 const ALLOWED_PDF_TYPES = ['application/pdf'];
 
+interface ProductData {
+  id?: string;
+  part_number?: string;
+  name?: string;
+  brand?: string;
+  category?: string;
+  sub_category?: string;
+  description?: string;
+  stock?: number;
+  base_price?: number;
+  selling_price?: number;
+  image_url?: string | null;
+  pdf_datasheet_url?: string | null;
+}
+
 type ProductFormProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  initialData?: any;
+  initialData?: ProductData;
   cmsCategories?: string[];
 };
+
 
 export default function ProductForm({ initialData, cmsCategories = [] }: ProductFormProps) {
   const router = useRouter();

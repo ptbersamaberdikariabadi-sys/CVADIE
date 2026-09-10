@@ -189,3 +189,94 @@ export async function getShipmentById(id: string) {
   }
   return data;
 }
+
+export async function deleteShipment(shipmentId: string) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { success: false, error: 'Unauthorized' };
+
+  if (!shipmentId) return { success: false, error: 'ID shipment tidak valid' };
+
+  // 1. Fetch shipment and its items to revert stock
+  const { data: shipment, error: fetchError } = await supabase
+    .from('shipments')
+    .select(`
+      id, type,
+      shipment_items(id, product_id, compartment_id, quantity)
+    `)
+    .eq('id', shipmentId)
+    .single();
+
+  if (fetchError || !shipment) {
+    console.error("Error fetching shipment for deletion:", fetchError);
+    return { success: false, error: 'Shipment tidak ditemukan' };
+  }
+
+  // 2. Revert each item's stock effect
+  for (const item of (shipment.shipment_items || [])) {
+    const { product_id, compartment_id, quantity } = item;
+
+    if (shipment.type === 'INBOUND') {
+      // Revert INBOUND: reduce placement and catalog stock
+      const { data: placement } = await supabase
+        .from('stock_placements')
+        .select('id, quantity')
+        .eq('product_id', product_id)
+        .eq('compartment_id', compartment_id)
+        .single();
+
+      if (placement) {
+        const newQty = placement.quantity - quantity;
+        if (newQty <= 0) {
+          await supabase.from('stock_placements').delete().eq('id', placement.id);
+        } else {
+          await supabase.from('stock_placements').update({ quantity: newQty }).eq('id', placement.id);
+        }
+      }
+
+      const { data: product } = await supabase.from('products').select('stock').eq('id', product_id).single();
+      if (product) {
+        await supabase.from('products').update({ stock: Math.max(0, (product.stock || 0) - quantity) }).eq('id', product_id);
+      }
+
+    } else {
+      // Revert OUTBOUND: restore placement and catalog stock
+      const { data: existingPlacement } = await supabase
+        .from('stock_placements')
+        .select('id, quantity')
+        .eq('product_id', product_id)
+        .eq('compartment_id', compartment_id)
+        .single();
+
+      if (existingPlacement) {
+        await supabase.from('stock_placements').update({ quantity: existingPlacement.quantity + quantity }).eq('id', existingPlacement.id);
+      } else {
+        await supabase.from('stock_placements').insert([{ product_id, compartment_id, quantity }]);
+      }
+
+      const { data: product } = await supabase.from('products').select('stock').eq('id', product_id).single();
+      if (product) {
+        await supabase.from('products').update({ stock: (product.stock || 0) + quantity }).eq('id', product_id);
+      }
+    }
+  }
+
+  // 3. Delete the shipment (cascade will delete shipment_items)
+  const { error: deleteError } = await supabase
+    .from('shipments')
+    .delete()
+    .eq('id', shipmentId);
+
+  if (deleteError) {
+    console.error("Error deleting shipment:", deleteError);
+    return { success: false, error: deleteError.message };
+  }
+
+  revalidatePath('/admin/shipments');
+  revalidatePath('/admin/warehouse');
+  revalidatePath('/admin/warehouse/history');
+  return { success: true };
+}
+

@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { cookies } from 'next/headers';
 import { Eye, MessageCircle } from 'lucide-react';
+import Link from 'next/link';
 import DeleteRFQButton from '@/components/admin/DeleteRFQButton';
 
 export default async function AdminRFQPage() {
@@ -79,9 +80,12 @@ export default async function AdminRFQPage() {
                     {getStatusBadge(rfq.status)}
                   </td>
                   <td className="p-4 text-right space-x-2">
-                    <button className="p-2 text-gray-400 hover:text-brand-primary bg-gray-50 hover:bg-brand-primary/10 rounded-lg transition-colors inline-flex items-center" title="Detail RFQ">
+                    <Link
+                      href={`/admin/rfq/${rfq.id}`}
+                      className="p-2 text-gray-400 hover:text-brand-primary bg-gray-50 hover:bg-brand-primary/10 rounded-lg transition-colors inline-flex items-center" title="Lihat Detail RFQ"
+                    >
                       <Eye className="w-4 h-4" />
-                    </button>
+                    </Link>
                     <a 
                       href={`https://wa.me/${(rfq.phone || '').replace(/[^0-9]/g, '')}?text=Halo Bapak/Ibu ${rfq.contact_person} dari ${rfq.company_name}, kami telah menerima permintaan penawaran (RFQ) Anda...`}
                       target="_blank"
@@ -91,7 +95,7 @@ export default async function AdminRFQPage() {
                     >
                       <MessageCircle className="w-4 h-4" />
                     </a>
-                    <DeleteRFQButton rfqId={rfq.id} />
+                    <DeleteRFQButton rfqId={rfq.id} isCompact />
                   </td>
                 </tr>
               ))
