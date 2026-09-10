@@ -77,12 +77,13 @@ export default function EditTransactionModal({ transaction, onClose, onSuccess }
   }, []);
 
   // When type changes, reset category to valid default
-  useEffect(() => {
-    const activeCategories = type === 'IN' ? inboundCategories : outboundCategories;
-    if (!activeCategories.includes(category)) {
-      setCategory(activeCategories[0] as TransactionCategory);
+  const handleSetType = (newType: 'IN' | 'OUT') => {
+    setType(newType);
+    const cats = newType === 'IN' ? inboundCategories : outboundCategories;
+    if (!cats.includes(category)) {
+      setCategory(cats[0] as TransactionCategory);
     }
-  }, [type, category]);
+  };
 
   const activeCategories = type === 'IN' ? inboundCategories : outboundCategories;
 
@@ -164,14 +165,14 @@ export default function EditTransactionModal({ transaction, onClose, onSuccess }
             <div className="flex gap-3 p-1 bg-gray-100 rounded-lg w-fit">
               <button
                 type="button"
-                onClick={() => setType('IN')}
+                onClick={() => handleSetType('IN')}
                 className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${type === 'IN' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
               >
                 Part Masuk (IN)
               </button>
               <button
                 type="button"
-                onClick={() => setType('OUT')}
+                onClick={() => handleSetType('OUT')}
                 className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${type === 'OUT' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
               >
                 Part Keluar (OUT)
